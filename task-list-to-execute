@@ -1,7 +1,4 @@
-# Task List to Execute
-
-Priority order:
-1. Browser QA http://localhost:5174
-2. Render cloud deploy sequence
-3. /status-project
-4. Apple theme polish
+1. render cloud deploy sequence
+2. /status-project
+3. Apple theme polish
+4. Railway cloud deploy
