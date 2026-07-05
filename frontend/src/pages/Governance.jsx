@@ -25,6 +25,223 @@ const TABS = [
   { key: 'inventory-cost-layers', label: 'Inventory Cost Layers' },
 ];
 
+const META = {
+  companies: {
+    titleField: 'company_name',
+    idField: 'company_id',
+    fields: [
+      { key: 'company_id', label: 'Company ID', required: true },
+      { key: 'company_name', label: 'Company Name', required: true },
+      { key: 'tax_registration_number', label: 'Tax Registration No.' },
+      { key: 'base_currency', label: 'Base Currency ID' },
+      { key: 'default_valuation_method', label: 'Default Valuation Method' },
+      { key: 'unrealized_profit_loss_account', label: 'Unrealized P/L Account' },
+      { key: 'is_active', label: 'Active', type: 'checkbox' },
+    ],
+  },
+  branches: {
+    titleField: 'branch_name',
+    idField: 'branch_id',
+    fields: [
+      { key: 'branch_id', label: 'Branch ID', required: true },
+      { key: 'company', label: 'Company ID', required: true },
+      { key: 'branch_name', label: 'Branch Name', required: true },
+      { key: 'branch_timezone', label: 'Timezone' },
+    ],
+  },
+  warehouses: {
+    titleField: 'warehouse_name',
+    idField: 'warehouse_id',
+    fields: [
+      { key: 'warehouse_id', label: 'Warehouse ID', required: true },
+      { key: 'branch', label: 'Branch ID', required: true },
+      { key: 'warehouse_name', label: 'Warehouse Name', required: true },
+      { key: 'is_virtual', label: 'Virtual', type: 'checkbox' },
+    ],
+  },
+  'item-categories': {
+    titleField: 'category_name',
+    idField: null,
+    fields: [
+      { key: 'company', label: 'Company ID' },
+      { key: 'category_name', label: 'Category Name', required: true },
+      { key: 'valuation_method', label: 'Valuation Method' },
+      { key: 'is_active', label: 'Active', type: 'checkbox' },
+    ],
+  },
+  'decimal-configs': {
+    titleField: 'config_id',
+    idField: 'config_id',
+    fields: [
+      { key: 'config_id', label: 'Config ID', required: true },
+      { key: 'company', label: 'Company ID' },
+      { key: 'currency_decimals', label: 'Currency Decimals', type: 'number' },
+      { key: 'quantity_decimals', label: 'Quantity Decimals', type: 'number' },
+      { key: 'price_decimals', label: 'Price Decimals', type: 'number' },
+    ],
+  },
+  'gl-default-accounts': {
+    titleField: 'config_id',
+    idField: 'config_id',
+    fields: [
+      { key: 'config_id', label: 'Config ID', required: true },
+      { key: 'company', label: 'Company ID', required: true },
+      { key: 'ar_default_account', label: 'AR Default Account' },
+      { key: 'ap_default_account', label: 'AP Default Account' },
+      { key: 'revenue_default_account', label: 'Revenue Default Account' },
+      { key: 'cogs_default_account', label: 'COGS Default Account' },
+      { key: 'inventory_asset_account', label: 'Inventory Asset Account' },
+      { key: 'tax_payable_account', label: 'Tax Payable Account' },
+      { key: 'tax_receivable_account', label: 'Tax Receivable Account' },
+      { key: 'fx_gain_loss_account', label: 'FX Gain/Loss Account' },
+      { key: 'inventory_adjustment_account', label: 'Inventory Adjustment Account' },
+    ],
+  },
+  currencies: {
+    titleField: 'currency_id',
+    idField: 'currency_id',
+    fields: [
+      { key: 'currency_id', label: 'Currency ID', required: true },
+      { key: 'currency_symbol', label: 'Symbol' },
+    ],
+  },
+  'exchange-rates': {
+    titleField: 'rate_id',
+    idField: null,
+    fields: [
+      { key: 'from_currency', label: 'From Currency', required: true },
+      { key: 'to_currency', label: 'To Currency', required: true },
+      { key: 'rate_date', label: 'Rate Date', required: true },
+      { key: 'exchange_rate', label: 'Exchange Rate', type: 'number', required: true },
+    ],
+  },
+  'fiscal-periods': {
+    titleField: 'period_name',
+    idField: 'period_id',
+    fields: [
+      { key: 'period_id', label: 'Period ID', required: true },
+      { key: 'company', label: 'Company ID', required: true },
+      { key: 'period_name', label: 'Period Name', required: true },
+      { key: 'start_date', label: 'Start Date', required: true },
+      { key: 'end_date', label: 'End Date', required: true },
+      { key: 'is_globally_locked', label: 'Globally Locked', type: 'checkbox' },
+    ],
+  },
+  'module-period-locks': {
+    titleField: 'lock_id',
+    idField: null,
+    fields: [
+      { key: 'period', label: 'Period ID', required: true },
+      { key: 'module_name', label: 'Module Name', required: true },
+      { key: 'is_locked', label: 'Locked', type: 'checkbox' },
+    ],
+  },
+  'stock-balances': {
+    titleField: 'balance_id',
+    idField: null,
+    fields: [
+      { key: 'item', label: 'Item ID' },
+      { key: 'warehouse', label: 'Warehouse ID' },
+      { key: 'quantity_on_hand', label: 'On Hand', type: 'number' },
+      { key: 'quantity_reserved', label: 'Reserved', type: 'number' },
+      { key: 'quantity_available', label: 'Available', type: 'number' },
+      { key: 'average_unit_cost', label: 'Average Unit Cost', type: 'number' },
+    ],
+  },
+  'inventory-journals': {
+    titleField: 'inv_journal_id',
+    idField: null,
+    fields: [
+      { key: 'item', label: 'Item ID' },
+      { key: 'warehouse', label: 'Warehouse ID' },
+      { key: 'cost_layer', label: 'Cost Layer ID' },
+      { key: 'source_document_type', label: 'Document Type' },
+      { key: 'source_document_id', label: 'Document ID' },
+      { key: 'quantity_delta', label: 'Quantity Delta', type: 'number' },
+      { key: 'unit_cost', label: 'Unit Cost', type: 'number' },
+      { key: 'total_valuation_delta', label: 'Valuation Delta', type: 'number' },
+    ],
+  },
+  'cycle-counts': {
+    titleField: 'cycle_count_id',
+    idField: null,
+    fields: [
+      { key: 'warehouse', label: 'Warehouse ID' },
+      { key: 'status', label: 'Status' },
+      { key: 'scheduled_date', label: 'Scheduled Date' },
+    ],
+  },
+  'cycle-count-items': {
+    titleField: 'count_item_id',
+    idField: null,
+    fields: [
+      { key: 'cycle_count', label: 'Cycle Count ID' },
+      { key: 'item', label: 'Item ID' },
+      { key: 'system_quantity', label: 'System Quantity', type: 'number' },
+      { key: 'counted_quantity', label: 'Counted Quantity', type: 'number' },
+      { key: 'variance_quantity', label: 'Variance Quantity', type: 'number' },
+      { key: 'adjustment_journal_entry_id', label: 'Journal Entry ID' },
+    ],
+  },
+  'audit-trails': {
+    titleField: 'audit_id',
+    idField: null,
+    fields: [
+      { key: 'company', label: 'Company ID' },
+      { key: 'user', label: 'User ID' },
+      { key: 'table_name', label: 'Table Name' },
+      { key: 'record_id', label: 'Record ID' },
+    ],
+  },
+  roles: {
+    titleField: 'role_name',
+    idField: null,
+    fields: [
+      { key: 'role_name', label: 'Role Name', required: true },
+    ],
+  },
+  'company-users': {
+    titleField: 'assignment_id',
+    idField: null,
+    fields: [
+      { key: 'user', label: 'User ID', required: true },
+      { key: 'company', label: 'Company ID', required: true },
+      { key: 'branch', label: 'Branch ID' },
+    ],
+  },
+  permissions: {
+    titleField: 'permission_id',
+    idField: 'permission_id',
+    fields: [
+      { key: 'permission_id', label: 'Permission ID', required: true },
+      { key: 'module_name', label: 'Module Name', required: true },
+    ],
+  },
+  'role-permissions': {
+    titleField: 'role_permission_id',
+    idField: null,
+    fields: [
+      { key: 'role', label: 'Role ID', required: true },
+      { key: 'permission', label: 'Permission ID', required: true },
+    ],
+  },
+  'inventory-cost-layers': {
+    titleField: 'layer_id',
+    idField: null,
+    fields: [
+      { key: 'company', label: 'Company ID' },
+      { key: 'warehouse', label: 'Warehouse ID' },
+      { key: 'item', label: 'Item ID' },
+      { key: 'source_receipt_id', label: 'Receipt ID' },
+      { key: 'layer_date', label: 'Layer Date' },
+      { key: 'received_quantity', label: 'Received Qty', type: 'number' },
+      { key: 'remaining_quantity', label: 'Remaining Qty', type: 'number' },
+      { key: 'unit_cost', label: 'Unit Cost', type: 'number' },
+      { key: 'is_fully_consumed', label: 'Fully Consumed', type: 'checkbox' },
+    ],
+  },
+};
+
 export default function Governance() {
   const [tab, setTab] = useState('companies');
   const [records, setRecords] = useState([]);
@@ -32,6 +249,8 @@ export default function Governance() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({});
   const [editId, setEditId] = useState(null);
+
+  const meta = META[tab];
 
   const load = async () => {
     setLoading(true);
@@ -46,56 +265,6 @@ export default function Governance() {
 
   useEffect(() => { load(); }, [tab]);
 
-  const titleMap = {
-    companies: 'company_name',
-    branches: 'branch_name',
-    warehouses: 'warehouse_name',
-    'item-categories': 'category_name',
-    'decimal-configs': 'config_id',
-    'gl-default-accounts': 'config_id',
-    currencies: 'currency_id',
-    'exchange-rates': 'rate_id',
-    'fiscal-periods': 'period_name',
-    'module-period-locks': 'lock_id',
-    'stock-balances': 'balance_id',
-    'inventory-journals': 'inv_journal_id',
-    'cycle-counts': 'cycle_count_id',
-    'cycle-count-items': 'count_item_id',
-    'audit-trails': 'audit_id',
-    roles: 'role_name',
-    'company-users': 'assignment_id',
-    permissions: 'permission_id',
-    'role-permissions': 'role_permission_id',
-    'inventory-cost-layers': 'layer_id',
-  };
-
-  const titleField = titleMap[tab] || 'name';
-
-  const idKeysByTab = {
-    companies: 'company_id',
-    branches: 'branch_id',
-    warehouses: 'warehouse_id',
-    'item-categories': 'category_id',
-    'decimal-configs': 'config_id',
-    'gl-default-accounts': 'config_id',
-    currencies: 'currency_id',
-    'exchange-rates': null,
-    'fiscal-periods': 'period_id',
-    'module-period-locks': null,
-    'stock-balances': null,
-    'inventory-journals': null,
-    'cycle-counts': null,
-    'cycle-count-items': null,
-    'audit-trails': null,
-    roles: null,
-    'company-users': null,
-    permissions: 'permission_id',
-    'role-permissions': null,
-    'inventory-cost-layers': null,
-  };
-
-  const idField = idKeysByTab[tab];
-
   const openCreate = () => {
     setEditId(null);
     setForm({});
@@ -104,7 +273,7 @@ export default function Governance() {
 
   const openEdit = (row) => {
     setEditId(row.id ?? row.pk);
-    setForm(row);
+    setForm({ ...row });
     setOpen(true);
   };
 
@@ -116,46 +285,15 @@ export default function Governance() {
 
   const save = async () => {
     const payload = { ...form };
-    if (!idField) delete payload[idField];
+    const idField = meta.idField;
+    if (idField && !payload[idField]) delete payload[idField];
     if (editId) await governance[tab].update(editId, payload);
     else await governance[tab].create(payload);
     setOpen(false);
     load();
   };
 
-  const formFields =
-    tab === 'companies'
-      ? [
-          { key: 'company_id', label: 'Company ID', required: true },
-          { key: 'company_name', label: 'Company Name', required: true },
-          { key: 'tax_registration_number', label: 'Tax Registration No.' },
-          { key: 'base_currency', label: 'Base Currency ID' },
-          { key: 'default_valuation_method', label: 'Default Valuation Method' },
-          { key: 'is_active', label: 'Active', type: 'checkbox' },
-        ]
-      : tab === 'branches'
-        ? [
-            { key: 'branch_id', label: 'Branch ID', required: true },
-            { key: 'company', label: 'Company', required: true },
-            { key: 'branch_name', label: 'Branch Name', required: true },
-            { key: 'branch_timezone', label: 'Timezone' },
-          ]
-        : tab === 'warehouses'
-          ? [
-              { key: 'warehouse_id', label: 'Warehouse ID', required: true },
-              { key: 'branch', label: 'Branch', required: true },
-              { key: 'warehouse_name', label: 'Warehouse Name', required: true },
-              { key: 'is_virtual', label: 'Virtual', type: 'checkbox' },
-            ]
-          : tab === 'item-categories'
-            ? [
-                { key: 'category_name', label: 'Category Name', required: true },
-                { key: 'valuation_method', label: 'Valuation Method' },
-                { key: 'is_active', label: 'Active', type: 'checkbox' },
-              ]
-            : null;
-
-  const showForm = formFields !== null;
+  const rowKey = (row) => row.id ?? row.pk;
 
   return (
     <div className="space-y-4">
@@ -192,28 +330,18 @@ export default function Governance() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-black/[0.02] text-[var(--color-ink-secondary)]">
               <tr>
-                <th className="px-4 py-3 font-medium">{titleField.toUpperCase()}</th>
+                <th className="px-4 py-3 font-medium">{meta.titleField.toUpperCase()}</th>
                 <th className="px-4 py-3 font-medium">ACTIONS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border)]">
               {records.map((row) => (
-                <tr key={row.id ?? row.pk}>
-                  <td className="px-4 py-3 font-medium text-[var(--color-ink)]">{row[titleField]}</td>
+                <tr key={rowKey(row)}>
+                  <td className="px-4 py-3 font-medium text-[var(--color-ink)]">{row[meta.titleField]}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-3">
-                      <button
-                        onClick={() => openEdit(row)}
-                        className="font-semibold text-[var(--color-apple-blue)] hover:underline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => remove(row)}
-                        className="font-semibold text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
+                      <button onClick={() => openEdit(row)} className="font-semibold text-[var(--color-apple-blue)] hover:underline">Edit</button>
+                      <button onClick={() => remove(row)} className="font-semibold text-red-600 hover:underline">Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -223,52 +351,49 @@ export default function Governance() {
         </div>
       )}
       <Modal open={open} onClose={() => setOpen(false)} title={editId ? 'Edit' : 'Create'}>
-        {showForm ? (
-          <div className="space-y-3">
-            {(formFields || []).map((field) => (
-              <div key={field.key}>
-                <label className="mb-1 block text-xs font-semibold text-[var(--color-ink-secondary)]">{field.label}</label>
-                <input
-                  className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--color-apple-blue)]"
-                  value={form[field.key] ?? ''}
-                  onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
-                />
-              </div>
-            ))}
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setOpen(false)}
-                className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-ink-secondary)] hover:bg-black/5"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={save}
-                className="rounded-lg bg-[var(--color-apple-blue)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-apple-blue-hover)]"
-              >
-                Save
-              </button>
-            </div>
+        {(meta.fields || []).map((field) => (
+          <div key={field.key}>
+            <label className="mb-1 block text-xs font-semibold text-[var(--color-ink-secondary)]">{field.label}</label>
+            <input
+              className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--color-apple-blue)]"
+              value={
+                field.type === 'checkbox'
+                  ? ''
+                  : form[field.key] ?? ''
+              }
+              onChange={(e) => {
+                const next = { ...form, [field.key]: e.target.value };
+                setForm(next);
+              }}
+              type={field.type === 'checkbox' ? 'checkbox' : field.type || 'text'}
+              placeholder={field.type === 'checkbox' ? ' ' : undefined}
+              checked={
+                field.type === 'checkbox'
+                  ? !!form[field.key]
+                  : undefined
+              }
+              onCheckedChange={
+                field.type === 'checkbox'
+                  ? (val) => setForm({ ...form, [field.key]: val })
+                  : undefined
+              }
+            />
           </div>
-        ) : (
-          <div className="space-y-3">
-            <pre className="rounded-lg border border-[var(--color-border)] bg-black/5 p-3 text-xs">{JSON.stringify(form, null, 2)}</pre>
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setOpen(false)}
-                className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-ink-secondary)] hover:bg-black/5"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={save}
-                className="rounded-lg bg-[var(--color-apple-blue)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-apple-blue-hover)]"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        )}
+        ))}
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            onClick={() => setOpen(false)}
+            className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-semibold text-[var(--color-ink-secondary)] hover:bg-black/5"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={save}
+            className="rounded-lg bg-[var(--color-apple-blue)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-apple-blue-hover)]"
+          >
+            Save
+          </button>
+        </div>
       </Modal>
     </div>
   );
