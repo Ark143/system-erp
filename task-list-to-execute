@@ -1,4 +1,7 @@
-1. render cloud deploy sequence
-2. /status-project
-3. Apple theme polish
-4. Railway cloud deploy
+DONE: Verify real login flow after every frontend rebuild.
+DONE: Polish Apple theme globally: typography, spacing, cards, borders.
+IN_PROGRESS: Render cloud deploy sequence
+PENDING: Railway cloud deploy
+PENDING: Full auth + module endpoint QA with real data.
+PENDING: Finalize /issue-logs and /status-project.
+PENDING: Validate Docker compose docs when Docker is available.
