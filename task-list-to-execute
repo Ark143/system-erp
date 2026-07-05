@@ -1,7 +1,8 @@
 DONE: Verify real login flow after every frontend rebuild.
-DONE: Polish Apple theme globally: typography, spacing, cards, borders.
-IN_PROGRESS: Render cloud deploy sequence
-PENDING: Railway cloud deploy
-PENDING: Full auth + module endpoint QA with real data.
+DONE: Polish Apple theme globally.
+DONE: Render cloud deploy sequence.
+DONE: Governance Global Configurations & Master Governance module.
+DONE: Full auth + module endpoint QA with real data.
+IN_PROGRESS: Railway cloud deploy
 PENDING: Finalize /issue-logs and /status-project.
 PENDING: Validate Docker compose docs when Docker is available.
