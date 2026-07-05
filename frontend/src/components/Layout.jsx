@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context.jsx';
 import {
   LayoutDashboard, Package, ShoppingCart, Truck, Calculator,
-  BookOpen, CheckSquare, Shield, Users, ChevronRight, LogOut,
+  BookOpen, CheckSquare, Shield, Users, ChevronRight, ChevronLeft, LogOut, Menu, X
 } from 'lucide-react';
 
 const SECTIONS = [
@@ -14,6 +14,7 @@ const SECTIONS = [
     to: '/inventory/items',
     icon: Package,
     children: [
+      { key: 'items', label: 'Items', to: '/inventory/items' },
       { key: 'inventory-journals', label: 'Inventory Journals', to: '/inventory/journal' },
       { key: 'stock-balances', label: 'Stock Balances', to: '/inventory/stock-balances' },
       { key: 'item-categories', label: 'Item Categories', to: '/inventory/item-categories' },
@@ -131,85 +132,186 @@ const linkBase = 'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semi
 const active = 'bg-black/[0.04] text-[var(--color-ink)]';
 const base = 'text-[var(--color-ink-secondary)]';
 
-function SectionItem({ section, child, depth = 0 }) {
-  if (child) {
-    return (
-      <NavLink
-        to={child.to}
-        end={false}
-        className={({ isActive }) =>
-          `${linkBase} ${isActive ? active : base} ${depth > 0 ? 'pl-9' : ''}`
-        }
-      >
-        <ChevronRight size={16} />
-        {child.label}
-      </NavLink>
-    );
-  }
-
-  const Icon = section?.icon;
-  const isExact = section?.exact;
-
-  return (
-    <NavLink
-      to={section.to}
-      end={isExact}
-      className={({ isActive }) => `${linkBase} ${isActive ? active : base}`}
-    >
-      {renderIcon(Icon, 18, '')}
-      {section.label}
-    </NavLink>
-  );
-}
-
 export default function Layout() {
   const { user, logout, rbac } = useAuth();
   const navigate = useNavigate();
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem('sidebar-collapsed') === 'true';
+  });
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', isCollapsed);
+  }, [isCollapsed]);
+
   const doLogout = () => { logout(); navigate('/login'); };
 
-  return (
-    <div className="flex h-screen overflow-hidden">
-      <aside className="flex w-64 flex-col border-r border-[var(--color-border)] bg-white">
-        <div className="px-6 py-5 text-lg font-bold tracking-tight text-[var(--color-ink)]">System erp</div>
-        <nav className="flex-1 overflow-y-auto px-3 space-y-1 pb-3">
-          {SECTIONS.map((section) => {
-            const allowed = Array.isArray(rbac?.visible_modules) ? rbac.visible_modules : [];
-            if (!allowed.includes(section.key)) return null;
-            if (section.children) {
-              return (
-                <div key={section.key} className="space-y-1">
-                  <div className="mt-2 mb-1 px-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-secondary)]">
-                    {renderIcon(section.icon, 14, 'mr-2 inline')}
-                    {section.label}
-                  </div>
-                  {section.children.map((child) => (
-                    <SectionItem key={child.key} child={child} depth={1} />
-                  ))}
+  const allowedModules = Array.isArray(rbac?.visible_modules) ? rbac.visible_modules : [];
+
+  const navContent = (collapsedMode) => (
+    <div className="space-y-1">
+      {SECTIONS.map((section) => {
+        if (!allowedModules.includes(section.key)) return null;
+
+        const Icon = section.icon;
+        const isExact = section.exact;
+
+        if (collapsedMode) {
+          return (
+            <div key={section.key} className="group relative flex justify-center py-1">
+              <NavLink
+                to={section.to}
+                end={isExact}
+                className={({ isActive }) =>
+                  `flex h-10 w-10 items-center justify-center rounded-xl transition ${isActive ? active : base} hover:bg-black/5`
+                }
+              >
+                {renderIcon(Icon, 20)}
+              </NavLink>
+              {/* Flyout Menu */}
+              <div className="absolute left-full top-0 ml-2 z-50 hidden group-hover:flex flex-col bg-white border border-[var(--color-border)] shadow-xl rounded-xl p-2 w-52 transition-all">
+                <div className="px-3 py-1.5 text-xs font-semibold text-[var(--color-ink-secondary)] uppercase tracking-wider border-b border-[var(--color-border)] mb-1">
+                  {section.label}
                 </div>
-              );
-            }
-            return <SectionItem key={section.key} section={section} />;
-          })}
+                {section.children ? (
+                  section.children.map((child) => (
+                    <NavLink
+                      key={child.key}
+                      to={child.to}
+                      className={({ isActive }) =>
+                        `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold no-underline transition ${
+                          isActive ? 'bg-black/[0.04] text-[var(--color-ink)]' : 'text-[var(--color-ink-secondary)] hover:bg-black/5'
+                        }`
+                      }
+                    >
+                      <ChevronRight size={14} />
+                      {child.label}
+                    </NavLink>
+                  ))
+                ) : (
+                  <NavLink
+                    to={section.to}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold no-underline transition text-[var(--color-ink-secondary)] hover:bg-black/5"
+                  >
+                    Open {section.label}
+                  </NavLink>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        // Expanded Mode
+        if (section.children) {
+          return (
+            <div key={section.key} className="space-y-1">
+              <div className="mt-4 mb-1 px-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-secondary)] flex items-center">
+                {renderIcon(section.icon, 14, 'mr-2')}
+                {section.label}
+              </div>
+              {section.children.map((child) => (
+                <NavLink
+                  key={child.key}
+                  to={child.to}
+                  className={({ isActive }) =>
+                    `${linkBase} ${isActive ? active : base} pl-9`
+                  }
+                >
+                  {child.label}
+                </NavLink>
+              ))}
+            </div>
+          );
+        }
+
+        return (
+          <NavLink
+            key={section.key}
+            to={section.to}
+            end={isExact}
+            className={({ isActive }) => `${linkBase} ${isActive ? active : base}`}
+          >
+            {renderIcon(Icon, 18)}
+            {section.label}
+          </NavLink>
+        );
+      })}
+    </div>
+  );
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-[var(--color-surface)]">
+      {/* Desktop Sidebar */}
+      <aside className={`hidden md:flex flex-col border-r border-[var(--color-border)] bg-white transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
+        <div className={`px-6 py-5 text-lg font-bold tracking-tight text-[var(--color-ink)] border-b border-[var(--color-border)] overflow-hidden whitespace-nowrap`}>
+          {isCollapsed ? 'SE' : 'System erp'}
+        </div>
+        <nav className="flex-1 overflow-y-auto px-3 space-y-1 pb-3 pt-4">
+          {navContent(isCollapsed)}
         </nav>
-        <div className="p-3">
+        <div className="p-3 border-t border-[var(--color-border)] space-y-1">
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="flex w-full items-center justify-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-[var(--color-ink-secondary)] transition hover:bg-black/5"
+          >
+            {isCollapsed ? <ChevronRight size={18} /> : <><ChevronLeft size={18} /> Collapse</>}
+          </button>
           <button
             onClick={doLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-[var(--color-ink-secondary)] transition hover:bg-black/5"
+            className={`flex w-full items-center ${isCollapsed ? 'justify-center' : 'gap-3'} rounded-xl px-4 py-3 text-sm font-semibold text-[var(--color-ink-secondary)] transition hover:bg-black/5`}
           >
             <LogOut size={18} />
-            Logout
+            {!isCollapsed && 'Logout'}
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto bg-[var(--color-surface)]">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border)] bg-white/80 px-8 py-4 backdrop-blur">
-          <h1 className="text-base font-semibold uppercase tracking-widest text-[var(--color-ink-secondary)]">{user?.role || 'User'}</h1>
+
+      {/* Mobile Drawer Sidebar */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsMobileOpen(false)} />
+          <aside className="relative flex w-64 flex-col bg-white h-full shadow-xl">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--color-border)]">
+              <div className="text-lg font-bold tracking-tight text-[var(--color-ink)]">System erp</div>
+              <button onClick={() => setIsMobileOpen(false)} className="p-1 rounded-lg hover:bg-black/5">
+                <X size={20} />
+              </button>
+            </div>
+            <nav className="flex-1 overflow-y-auto px-3 space-y-1 pb-3 pt-4">
+              {navContent(false)}
+            </nav>
+            <div className="p-3 border-t border-[var(--color-border)]">
+              <button
+                onClick={doLogout}
+                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-[var(--color-ink-secondary)] transition hover:bg-black/5"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Header bar with Burger menu for Mobile */}
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border)] bg-white/80 px-6 py-4 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setIsMobileOpen(true)} className="md:hidden p-1.5 rounded-lg hover:bg-black/5 text-[var(--color-ink-secondary)]">
+              <Menu size={20} />
+            </button>
+            <h1 className="text-sm font-semibold uppercase tracking-widest text-[var(--color-ink-secondary)]">{user?.role || 'User'}</h1>
+          </div>
           <div className="text-sm font-medium text-[var(--color-ink-secondary)]">{user?.email}</div>
         </header>
-        <div className="mx-auto max-w-6xl p-6">
-          <Outlet />
-        </div>
-      </main>
+
+        <main className="flex-1 overflow-auto bg-[var(--color-surface)]">
+          <div className="mx-auto max-w-6xl p-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

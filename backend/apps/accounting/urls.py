@@ -5,6 +5,7 @@ from .views import (
   ExchangeRateViewSet, CurrencyViewSet, GLDefaultAccountViewSet,
   PaymentEntryViewSet, BankReconciliationViewSet,
 )
+from .reports import trial_balance, account_balance
 
 router = DefaultRouter()
 router.register('accounts', AccountViewSet, basename='account')
@@ -19,4 +20,6 @@ router.register('bank-reconciliation', BankReconciliationViewSet, basename='bank
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('reports/trial-balance/', trial_balance),
+    path('accounts/<int:account_id>/balance/', account_balance),
 ]

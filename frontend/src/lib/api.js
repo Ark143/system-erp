@@ -92,13 +92,16 @@ export const sales = {
   deliveries: {
     list: (params) => getList('/sales/deliveries/', params),
   },
+  orderItems: {
+    create: (payload) => createItem('/sales/sales-order-items/', payload),
+  },
 };
 export const purchasing = {
   vendors: {
-    list: (params) => getList('/purchasing/vendors/', params),
-    create: (payload) => createItem('/purchasing/vendors/', payload),
-    update: (id, payload) => updateItem('/purchasing/vendors/', id, payload),
-    remove: (id) => deleteItem('/purchasing/vendors/', id),
+    list: (params) => getList('/purchasing/suppliers/', params),
+    create: (payload) => createItem('/purchasing/suppliers/', payload),
+    update: (id, payload) => updateItem('/purchasing/suppliers/', id, payload),
+    remove: (id) => deleteItem('/purchasing/suppliers/', id),
   },
   purchaseOrders: {
     list: (params) => getList('/purchasing/purchase-orders/', params),
@@ -109,18 +112,18 @@ export const purchasing = {
     reject: (id) => action('/purchasing/purchase-orders/', id, 'reject'),
   },
   suppliers: {
-    list: (params) => getList('/purchasing/vendors/', params),
-    create: (payload) => createItem('/purchasing/vendors/', payload),
-    update: (id, payload) => updateItem('/purchasing/vendors/', id, payload),
-    remove: (id) => deleteItem('/purchasing/vendors/', id),
+    list: (params) => getList('/purchasing/suppliers/', params),
+    create: (payload) => createItem('/purchasing/suppliers/', payload),
+    update: (id, payload) => updateItem('/purchasing/suppliers/', id, payload),
+    remove: (id) => deleteItem('/purchasing/suppliers/', id),
   },
   prs: {
-    list: (params) => getList('/purchasing/purchase-requests/', params),
-    create: (payload) => createItem('/purchasing/purchase-requests/', payload),
-    submit: (id) => action('/purchasing/purchase-requests/', id, 'submit'),
-    approve: (id) => action('/purchasing/purchase-requests/', id, 'approve'),
-    reject: (id) => action('/purchasing/purchase-requests/', id, 'reject'),
-    update: (id, payload) => updateItem('/purchasing/purchase-requests/', id, payload),
+    list: (params) => getList('/purchasing/purchase-requisitions/', params),
+    create: (payload) => createItem('/purchasing/purchase-requisitions/', payload),
+    submit: (id) => action('/purchasing/purchase-requisitions/', id, 'submit'),
+    approve: (id) => action('/purchasing/purchase-requisitions/', id, 'approve'),
+    reject: (id) => action('/purchasing/purchase-requisitions/', id, 'reject'),
+    update: (id, payload) => updateItem('/purchasing/purchase-requisitions/', id, payload),
   },
   pos: {
     list: (params) => getList('/purchasing/purchase-orders/', params),
@@ -131,7 +134,13 @@ export const purchasing = {
     update: (id, payload) => updateItem('/purchasing/purchase-orders/', id, payload),
   },
   grns: {
-    list: (params) => getList('/purchasing/grns/', params),
+    list: (params) => getList('/purchasing/grn/', params),
+  },
+  prItems: {
+    create: (payload) => createItem('/purchasing/purchase-requisition-items/', payload),
+  },
+  poItems: {
+    create: (payload) => createItem('/purchasing/purchase-order-items/', payload),
   },
 };
 export const accounting = {
@@ -140,10 +149,16 @@ export const accounting = {
     create: (payload) => createItem('/accounting/chart-of-accounts/', payload),
     update: (id, payload) => updateItem('/accounting/chart-of-accounts/', id, payload),
   },
-  journals: {
+  accounts: {
+    list: (params) => getList('/accounting/accounts/', params),
+    create: (payload) => createItem('/accounting/accounts/', payload),
+    update: (id, payload) => updateItem('/accounting/accounts/', id, payload),
+  },
+  journalEntries: {
     list: (params) => getList('/accounting/journal-entries/', params),
     create: (payload) => createItem('/accounting/journal-entries/', payload),
   },
+  trialBalance: (params) => getList('/accounting/reports/trial-balance/', params),
   invoices: {
     list: (params) => getList('/accounting/sales-invoices/', params),
   },
@@ -155,9 +170,23 @@ export const accounting = {
   },
 };
 export const reports = {
-  list: (params) => getList('/reports/saved/', params),
-  get: (id) => getItem('/reports/saved/', id),
-  create: (payload) => createItem('/reports/saved/', payload),
+  generalLedger: async (params) => {
+    const data = await getList('/reports/general-ledger/', params);
+    return Array.isArray(data?.results) ? data.results : [];
+  },
+  trialBalance: async (params) => {
+    const data = await getList('/reports/trial-balance/', params);
+    return Array.isArray(data?.results) ? data.results : [];
+  },
+  financialReports: async (params) => {
+    const data = await getList('/reports/financial-reports/', params);
+    return Array.isArray(data?.results) ? data.results : [];
+  },
+  saved: {
+    list: (params) => getList('/reports/saved/', params),
+    get: (id) => getItem('/reports/saved/', id),
+    create: (payload) => createItem('/reports/saved/', payload),
+  },
   run: (reportName, filters) =>
     request(`/reports/run/${encodeURIComponent(reportName)}/`, {
       method: 'POST',
@@ -169,14 +198,46 @@ export const governance = {
     list: () => getList('/governance/configurations/', {}),
     update: (id, payload) => updateItem('/governance/configurations/', id, payload),
   },
+  roles: {
+    list: (params) => getList('/governance/roles/', params),
+  },
+  permissions: {
+    list: (params) => getList('/governance/permissions/', params),
+  },
+  rolePermissions: {
+    list: (params) => getList('/governance/role-permissions/', params),
+  },
 };
 export const workflow = {
+  list: (params) => getList('/workflow/workflows/', params),
+  create: (payload) => createItem('/workflow/workflows/', payload),
   approvals: {
     list: (params) => getList('/workflow/approvals/', params),
     action: (id, payload) => action('/workflow/approvals/', id, 'action', payload),
+    decide: (id, payload) => action('/workflow/approvals/', id, 'decide', payload),
   },
 };
 export const masterdata = {
+  taxes: {
+    list: (params) => getList('/masterdata/taxes/', params),
+    create: (payload) => createItem('/masterdata/taxes/', payload),
+  },
+  customers: {
+    list: (params) => getList('/masterdata/customers/', params),
+    create: (payload) => createItem('/masterdata/customers/', payload),
+  },
+  suppliers: {
+    list: (params) => getList('/masterdata/suppliers/', params),
+    create: (payload) => createItem('/masterdata/suppliers/', payload),
+  },
+  leads: {
+    list: (params) => getList('/masterdata/leads/', params),
+    create: (payload) => createItem('/masterdata/leads/', payload),
+  },
+  employees: {
+    list: (params) => getList('/masterdata/employees/', params),
+    create: (payload) => createItem('/masterdata/employees/', payload),
+  },
   templates: {
     list: () => getList('/masterdata/templates/', {}),
     get: (id) => getItem('/masterdata/templates/', id),
@@ -190,5 +251,6 @@ export const auth = {
   register: (payload) => request('/auth/register/', { method: 'POST', body: JSON.stringify(payload) }),
   profile: () => request('/auth/profile/', { method: 'GET' }),
   refresh: (payload) => request('/auth/token/refresh/', { method: 'POST', body: JSON.stringify(payload) }),
+  list: () => request('/auth/users/', { method: 'GET' }),
 };
 export const login = (payload) => auth.login(payload);
