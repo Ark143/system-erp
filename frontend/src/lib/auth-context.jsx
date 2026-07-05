@@ -1,76 +1,91 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
-const axiosClient = axios.create({ baseURL: API_BASE });
 
-axiosClient.interceptors.request.use((config) => {
+async function request(path, options = {}) {
   const token = localStorage.getItem('access');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
-
-axiosClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
-      original._retry = true;
-      const refresh = localStorage.getItem('refresh');
-      if (!refresh) return Promise.reject(error);
-      try {
-        const { data } = await axios.post(`${API_BASE}/auth/login/refresh/`, { refresh });
-        localStorage.setItem('access', data.access);
-        localStorage.setItem('refresh', data.refresh);
-        original.headers.Authorization = `Bearer ${data.access}`;
-        return axiosClient(original);
-      } catch {
-        localStorage.removeItem('access');
-        localStorage.removeItem('refresh');
-        return Promise.reject(error);
-      }
-    }
-    return Promise.reject(error);
+  const headers = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {}),
+  };
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+    credentials: 'same-origin',
+  });
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch { data = text; }
+  if (!res.ok) {
+    const err = new Error(typeof data === 'string' ? data : data?.detail || `HTTP ${res.status}`);
+    err.status = res.status;
+    err.data = data;
+    throw err;
   }
-);
+  return data;
+}
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const raw = localStorage.getItem('user');
-    return raw ? JSON.parse(raw) : null;
+    try {
+      return JSON.parse(localStorage.getItem('user') || 'null');
+    } catch {
+      return null;
+    }
   });
+  const [rbac, setRbac] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('rbac') || 'null');
+    } catch {
+      return null;
+    }
+  });
+
   useEffect(() => {
-    const raw = localStorage.getItem('user');
-    if (raw) setUser(JSON.parse(raw));
+    try {
+      const raw = localStorage.getItem('user');
+      if (raw) setUser(JSON.parse(raw));
+      const rbacRaw = localStorage.getItem('rbac');
+      if (rbacRaw) setRbac(JSON.parse(rbacRaw));
+    } catch {
+      setUser(null);
+      setRbac(null);
+    }
   }, []);
 
   const login = async (email, password) => {
-    const { data } = await axiosClient.post('/auth/login/', { email, password });
+    const data = await request('/auth/login/', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
     localStorage.setItem('access', data.access);
     localStorage.setItem('refresh', data.refresh);
     localStorage.setItem('user', JSON.stringify(data.user));
     setUser(data.user);
-    return data;
-  };
-
-  const register = async (payload) => {
-    const { data } = await axiosClient.post('/auth/register/', payload);
+    try {
+      const rbacData = await request('/auth/rbac-routes/');
+      localStorage.setItem('rbac', JSON.stringify(rbacData));
+      setRbac(rbacData);
+    } catch {
+      localStorage.removeItem('rbac');
+      setRbac(null);
+    }
     return data;
   };
 
   const logout = () => {
     localStorage.clear();
     setUser(null);
+    setRbac(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, rbac, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export const useAuth = () => useContext(AuthContext);
-export default axiosClient;

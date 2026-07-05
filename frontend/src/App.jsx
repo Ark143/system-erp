@@ -13,9 +13,11 @@ import Reports from './pages/Reports.jsx';
 import Users from './pages/Users.jsx';
 import MasterData from './pages/MasterData.jsx';
 
-function PrivateRoute({ children }) {
-  const { user } = useAuth();
+function PrivateRoute({ children, moduleKey }) {
+  const { user, rbac } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
+  const visible = Array.isArray(rbac?.visible_modules) ? rbac.visible_modules : [];
+  if (moduleKey && !visible.includes(moduleKey)) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -24,17 +26,17 @@ function RoutesWithAuth() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+      <Route path="/" element={<PrivateRoute moduleKey="dashboard"><Layout /></PrivateRoute>}>
         <Route index element={<Dashboard />} />
-        <Route path="inventory" element={<Inventory />} />
-        <Route path="sales/*" element={<Sales />} />
-        <Route path="purchasing/*" element={<Purchasing />} />
-        <Route path="accounting" element={<Accounting />} />
-        <Route path="reports" element={<Reports />} />
-        <Route path="workflow" element={<Workflow />} />
-        <Route path="governance" element={<Governance />} />
-        <Route path="users" element={<Users />} />
-        <Route path="masterdata/*" element={<MasterData />} />
+        <Route path="inventory" element={<PrivateRoute moduleKey="inventory"><Inventory /></PrivateRoute>} />
+        <Route path="sales/*" element={<PrivateRoute moduleKey="sales"><Sales /></PrivateRoute>} />
+        <Route path="purchasing/*" element={<PrivateRoute moduleKey="purchasing"><Purchasing /></PrivateRoute>} />
+        <Route path="accounting" element={<PrivateRoute moduleKey="accounting"><Accounting /></PrivateRoute>} />
+        <Route path="reports" element={<PrivateRoute moduleKey="reports"><Reports /></PrivateRoute>} />
+        <Route path="workflow" element={<PrivateRoute moduleKey="workflow"><Workflow /></PrivateRoute>} />
+        <Route path="governance" element={<PrivateRoute moduleKey="governance"><Governance /></PrivateRoute>} />
+        <Route path="users" element={<PrivateRoute moduleKey="users"><Users /></PrivateRoute>} />
+        <Route path="masterdata/*" element={<PrivateRoute moduleKey="masterdata"><MasterData /></PrivateRoute>} />
       </Route>
     </Routes>
   );

@@ -7,20 +7,13 @@ import {
 } from 'lucide-react';
 
 const SECTIONS = [
-  {
-    key: 'dashboard',
-    label: 'Dashboard',
-    to: '/',
-    icon: LayoutDashboard,
-    exact: true,
-  },
+  { key: 'dashboard', label: 'Dashboard', to: '/', icon: LayoutDashboard, exact: true },
   {
     key: 'inventory',
     label: 'Inventory',
+    to: '/inventory/items',
     icon: Package,
     children: [
-      { key: 'cycle-count-items', label: 'Cycle Count Items', to: '/inventory/cycle-count-items' },
-      { key: 'cycle-counts', label: 'Cycle Counts', to: '/inventory/cycle-counts' },
       { key: 'inventory-journals', label: 'Inventory Journals', to: '/inventory/journal' },
       { key: 'stock-balances', label: 'Stock Balances', to: '/inventory/stock-balances' },
       { key: 'item-categories', label: 'Item Categories', to: '/inventory/item-categories' },
@@ -30,6 +23,7 @@ const SECTIONS = [
   {
     key: 'sales',
     label: 'Sales',
+    to: '/sales/customers',
     icon: ShoppingCart,
     children: [
       { key: 'blanket-order', label: 'Blanket Order', to: '/sales/blanket-orders' },
@@ -42,6 +36,7 @@ const SECTIONS = [
   {
     key: 'purchasing',
     label: 'Purchasing',
+    to: '/purchasing/suppliers',
     icon: Truck,
     children: [
       { key: 'purchase-quotation', label: 'Purchase Quotation', to: '/purchasing/quotations' },
@@ -53,12 +48,12 @@ const SECTIONS = [
   {
     key: 'accounting',
     label: 'Accounting',
+    to: '/accounting/accounts',
     icon: Calculator,
     children: [
       { key: 'exchange-rates', label: 'Exchange Rates', to: '/accounting/exchange-rates' },
       { key: 'currencies', label: 'Currencies', to: '/accounting/currencies' },
       { key: 'gl-default-accounts', label: 'GL Default Accounts', to: '/accounting/gl-default-accounts' },
-      { key: 'inventory-cost-layers', label: 'Inventory Cost Layers', to: '/accounting/inventory-cost-layers' },
       { key: 'fiscal-periods', label: 'Fiscal Periods', to: '/accounting/fiscal-periods' },
       { key: 'payment-entry', label: 'Payment Entry', to: '/accounting/payment-entries' },
       { key: 'journal-entry', label: 'Journal Entry', to: '/accounting/journal-entries' },
@@ -68,6 +63,7 @@ const SECTIONS = [
   {
     key: 'reports',
     label: 'Reports',
+    to: '/reports/general-ledger',
     icon: BookOpen,
     children: [
       { key: 'general-ledger', label: 'General Ledger', to: '/reports/general-ledger' },
@@ -78,6 +74,7 @@ const SECTIONS = [
   {
     key: 'workflow',
     label: 'Workflow',
+    to: '/workflow/approvals',
     icon: CheckSquare,
     children: [
       { key: 'approval', label: 'Approval', to: '/workflow/approvals' },
@@ -87,6 +84,7 @@ const SECTIONS = [
   {
     key: 'governance',
     label: 'Governance',
+    to: '/governance/companies',
     icon: Shield,
     children: [
       { key: 'audit-trails', label: 'Audit Trails', to: '/governance/audit-trails' },
@@ -98,8 +96,9 @@ const SECTIONS = [
     ],
   },
   {
-    key: 'user',
-    label: 'User',
+    key: 'users',
+    label: 'Users',
+    to: '/users/permissions',
     icon: Users,
     children: [
       { key: 'permissions', label: 'Permissions', to: '/users/permissions' },
@@ -110,9 +109,9 @@ const SECTIONS = [
   {
     key: 'masterdata',
     label: 'Master Data',
+    to: '/masterdata/import',
     icon: Users,
     children: [
-      { key: 'import', label: 'Data Import', to: '/masterdata/import' },
       { key: 'taxes', label: 'Taxes', to: '/masterdata/taxes' },
       { key: 'customer', label: 'Customer', to: '/masterdata/customers' },
       { key: 'supplier', label: 'Supplier', to: '/masterdata/suppliers' },
@@ -121,6 +120,12 @@ const SECTIONS = [
     ],
   },
 ];
+
+function renderIcon(iconProp, size, className) {
+  if (!iconProp) return null;
+  const Icon = iconProp;
+  return <Icon size={size} className={className || ''} />;
+}
 
 const linkBase = 'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold no-underline transition hover:bg-black/5';
 const active = 'bg-black/[0.04] text-[var(--color-ink)]';
@@ -151,14 +156,14 @@ function SectionItem({ section, child, depth = 0 }) {
       end={isExact}
       className={({ isActive }) => `${linkBase} ${isActive ? active : base}`}
     >
-      {Icon ? <Icon size={18} /> : <LayoutDashboard size={18} />}
+      {renderIcon(Icon, 18, '')}
       {section.label}
     </NavLink>
   );
 }
 
 export default function Layout() {
-  const { user, logout } = useAuth();
+  const { user, logout, rbac } = useAuth();
   const navigate = useNavigate();
   const doLogout = () => { logout(); navigate('/login'); };
 
@@ -168,11 +173,13 @@ export default function Layout() {
         <div className="px-6 py-5 text-lg font-bold tracking-tight text-[var(--color-ink)]">System erp</div>
         <nav className="flex-1 overflow-y-auto px-3 space-y-1 pb-3">
           {SECTIONS.map((section) => {
+            const allowed = Array.isArray(rbac?.visible_modules) ? rbac.visible_modules : [];
+            if (!allowed.includes(section.key)) return null;
             if (section.children) {
               return (
                 <div key={section.key} className="space-y-1">
                   <div className="mt-2 mb-1 px-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-secondary)]">
-                    <section.icon size={14} className="mr-2 inline" />
+                    {renderIcon(section.icon, 14, 'mr-2 inline')}
                     {section.label}
                   </div>
                   {section.children.map((child) => (
@@ -181,7 +188,6 @@ export default function Layout() {
                 </div>
               );
             }
-
             return <SectionItem key={section.key} section={section} />;
           })}
         </nav>

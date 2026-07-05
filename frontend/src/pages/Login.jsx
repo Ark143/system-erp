@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context.jsx';
 
@@ -8,16 +8,24 @@ export default function Login() {
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    const email = emailRef.current?.value || form.email;
+    const password = passwordRef.current?.value || form.password;
     try {
-      await login(form.email, form.password);
+      await login(email, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed');
+      let message = 'Login failed';
+      if (err?.message) message = err.message;
+      else if (err?.response?.data?.detail) message = err.response.data.detail;
+      console.error('Login error:', err);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -33,14 +41,14 @@ export default function Login() {
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-secondary)]">Email</label>
-            <input value={form.email} onChange={(e)=> setForm({...form,email:e.target.value})} type="email" className="w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm outline-none focus:border-[var(--color-apple-blue)]" />
+            <input ref={emailRef} defaultValue={form.email} onChange={(e)=> setForm({...form,email:e.target.value})} type="email" autoComplete="email" name="email" className="w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm outline-none focus:border-[var(--color-apple-blue)]" />
           </div>
           <div>
             <label className="mb-1 block text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-secondary)]">Password</label>
-            <input value={form.password} onChange={(e)=> setForm({...form,password:e.target.value})} type="password" className="w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm outline-none focus:border-[var(--color-apple-blue)]" />
+            <input ref={passwordRef} defaultValue={form.password} onChange={(e)=> setForm({...form,password:e.target.value})} type="password" autoComplete="current-password" name="password" className="w-full rounded-xl border border-[var(--color-border)] px-4 py-3 text-sm outline-none focus:border-[var(--color-apple-blue)]" />
           </div>
           {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>}
-          <button disabled={loading} className="w-full rounded-xl bg-[var(--color-apple-blue)] py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-apple-blue-hover)] disabled:opacity-60">{loading? 'Signing in…' : 'Sign in'}</button>
+          <button disabled={loading} type="submit" className="w-full rounded-xl bg-[var(--color-apple-blue)] py-3 text-sm font-semibold text-white transition hover:bg-[var(--color-apple-blue-hover)] disabled:opacity-60">{loading? 'Signing in…' : 'Sign in'}</button>
         </form>
       </div>
     </div>

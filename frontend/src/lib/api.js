@@ -1,32 +1,46 @@
-import axiosClient from './auth-context.jsx';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
-export async function getList(path, params = {}) {
-  const { data } = await axiosClient.get(path, { params });
-  return Array.isArray(data) ? data : data?.results || [];
+async function request(path, options = {}) {
+  const token = localStorage.getItem('access');
+  const headers = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {}),
+  };
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+    credentials: 'same-origin',
+  });
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch { data = text; }
+  if (!res.ok) {
+    const err = new Error(typeof data === 'string' ? data : data?.detail || `HTTP ${res.status}`);
+    err.status = res.status;
+    err.data = data;
+    throw err;
+  }
+  return data;
 }
 
+export async function getList(path, params) {
+  const query = params ? `?${new URLSearchParams(params).toString()}` : '';
+  return request(path + query, { method: 'GET' });
+}
 export async function getItem(path, id) {
-  const { data } = await axiosClient.get(`${path}${id}/`);
-  return data;
+  return request(`${path}${id}/`, { method: 'GET' });
 }
-
 export async function createItem(path, payload) {
-  const { data } = await axiosClient.post(path, payload);
-  return data;
+  return request(path, { method: 'POST', body: JSON.stringify(payload) });
 }
-
 export async function updateItem(path, id, payload) {
-  const { data } = await axiosClient.patch(`${path}${id}/`, payload);
-  return data;
+  return request(`${path}${id}/`, { method: 'PATCH', body: JSON.stringify(payload) });
 }
-
 export async function deleteItem(path, id) {
-  await axiosClient.delete(`${path}${id}/`);
+  return request(`${path}${id}/`, { method: 'DELETE' });
 }
-
-export async function action(path, id, actionName, payload = {}) {
-  const { data } = await axiosClient.post(`${path}${id}/${actionName}/`, payload);
-  return data;
+export async function action(path, id, actionName, payload) {
+  return request(`${path}${id}/${actionName}/`, { method: 'POST', body: JSON.stringify(payload || {}) });
 }
 
 export const inventory = {
@@ -48,7 +62,6 @@ export const inventory = {
     list: (params) => getList('/inventory/stock-moves/', params),
   },
 };
-
 export const sales = {
   customers: {
     list: (params) => getList('/sales/customers/', params),
@@ -68,7 +81,6 @@ export const sales = {
     list: (params) => getList('/sales/sales-invoices/', params),
   },
 };
-
 export const purchasing = {
   suppliers: {
     list: (params) => getList('/purchasing/suppliers/', params),
@@ -93,7 +105,6 @@ export const purchasing = {
     reject: (id) => action('/purchasing/purchase-orders/', id, 'reject'),
   },
 };
-
 export const accounting = {
   accounts: {
     list: (params) => getList('/accounting/accounts/', params),
@@ -108,37 +119,36 @@ export const accounting = {
     post: (id) => action('/accounting/journal-entries/', id, 'post_entry'),
     cancel: (id) => action('/accounting/journal-entries/', id, 'cancel'),
   },
-  trialBalance: () => axiosClient.get('/accounting/reports/trial-balance/').then(r => r.data),
+  trialBalance: () => request('/accounting/reports/trial-balance/', { method: 'GET' }),
   exchangeRates: {
-    list: (params) => getList('/accounting/extra/exchange-rates/', params),
-    create: (payload) => createItem('/accounting/extra/exchange-rates/', payload),
-    update: (id, payload) => updateItem('/accounting/extra/exchange-rates/', id, payload),
-    remove: (id) => deleteItem('/accounting/extra/exchange-rates/', id),
+    list: (params) => getList('/accounting/exchange-rates/', params),
+    create: (payload) => createItem('/accounting/exchange-rates/', payload),
+    update: (id, payload) => updateItem('/accounting/exchange-rates/', id, payload),
+    remove: (id) => deleteItem('/accounting/exchange-rates/', id),
   },
   currencies: {
-    list: (params) => getList('/accounting/extra/currencies/', params),
-    create: (payload) => createItem('/accounting/extra/currencies/', payload),
-    update: (id, payload) => updateItem('/accounting/extra/currencies/', id, payload),
-    remove: (id) => deleteItem('/accounting/extra/currencies/', id),
+    list: (params) => getList('/accounting/currencies/', params),
+    create: (payload) => createItem('/accounting/currencies/', payload),
+    update: (id, payload) => updateItem('/accounting/currencies/', id, payload),
+    remove: (id) => deleteItem('/accounting/currencies/', id),
   },
   glDefaultAccounts: {
-    list: (params) => getList('/accounting/extra/gl-default-accounts/', params),
-    create: (payload) => createItem('/accounting/extra/gl-default-accounts/', payload),
-    update: (id, payload) => updateItem('/accounting/extra/gl-default-accounts/', id, payload),
-    remove: (id) => deleteItem('/accounting/extra/gl-default-accounts/', id),
+    list: (params) => getList('/accounting/gl-default-accounts/', params),
+    create: (payload) => createItem('/accounting/gl-default-accounts/', payload),
+    update: (id, payload) => updateItem('/accounting/gl-default-accounts/', id, payload),
+    remove: (id) => deleteItem('/accounting/gl-default-accounts/', id),
   },
   paymentEntries: {
-    list: (params) => getList('/accounting/extra/payment-entries/', params),
-    create: (payload) => createItem('/accounting/extra/payment-entries/', payload),
-    update: (id, payload) => updateItem('/accounting/extra/payment-entries/', id, payload),
+    list: (params) => getList('/accounting/payment-entries/', params),
+    create: (payload) => createItem('/accounting/payment-entries/', payload),
+    update: (id, payload) => updateItem('/accounting/payment-entries/', id, payload),
   },
   bankReconciliations: {
-    list: (params) => getList('/accounting/extra/bank-reconciliation/', params),
-    create: (payload) => createItem('/accounting/extra/bank-reconciliation/', payload),
-    update: (id, payload) => updateItem('/accounting/extra/bank-reconciliation/', id, payload),
+    list: (params) => getList('/accounting/bank-reconciliation/', params),
+    create: (payload) => createItem('/accounting/bank-reconciliation/', payload),
+    update: (id, payload) => updateItem('/accounting/bank-reconciliation/', id, payload),
   },
 };
-
 export const workflow = {
   list: (params) => getList('/workflow/workflows/', params),
   create: (payload) => createItem('/workflow/workflows/', payload),
@@ -146,16 +156,14 @@ export const workflow = {
   remove: (id) => deleteItem('/workflow/workflows/', id),
   approvals: {
     list: (params) => getList('/workflow/approvals/', params),
-    decide: (id, payload) => action('/workflow/approvals/', id, 'partial_update', payload).catch(e => action('/workflow/approvals/', id, 'update', payload)),
+    decide: (id, payload) => action('/workflow/approvals/', id, 'partial_update', payload),
   },
 };
-
 export const reports = {
-  generalLedger: () => axiosClient.get('/reports/general-ledger/').then(r => r.data),
-  trialBalance: () => axiosClient.get('/reports/trial-balance/').then(r => r.data),
-  financialReports: () => axiosClient.get('/reports/financial-reports/').then(r => r.data),
+  generalLedger: () => request('/reports/general-ledger/', { method: 'GET' }),
+  trialBalance: () => request('/reports/trial-balance/', { method: 'GET' }),
+  financialReports: () => request('/reports/financial-reports/', { method: 'GET' }),
 };
-
 export const masterdata = {
   taxes: {
     list: (params) => getList('/masterdata/taxes/', params),
@@ -188,7 +196,6 @@ export const masterdata = {
     remove: (id) => deleteItem('/masterdata/employees/', id),
   },
 };
-
 export const governance = {
   companies: {
     list: (params) => getList('/governance/companies/', params),
@@ -311,3 +318,11 @@ export const governance = {
     remove: (id) => deleteItem('/governance/inventory-cost-layers/', id),
   },
 };
+
+export const auth = {
+  login: (payload) => request('/auth/login/', { method: 'POST', body: JSON.stringify(payload) }),
+  rbacRoutes: () => request('/auth/rbac-routes/'),
+};
+export const login = (payload) => auth.login(payload);
+export const rbacRoutes = () => auth.rbacRoutes();
+export { login as authLogin, rbacRoutes as authRbacRoutes };
