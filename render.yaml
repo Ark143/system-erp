@@ -1,0 +1,53 @@
+databases:
+  - name: system-erp-db
+    region: singapore
+    plan: starter
+    databaseName: system_erp
+    user: postgres
+
+services:
+  - type: web
+    name: system-erp-backend
+    region: singapore
+    runtime: docker
+    plan: starter
+    branch: main
+    dockerfilePath: backend/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: system-erp-db
+          property: databaseName
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: system-erp-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: system-erp-db
+          property: password
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: system-erp-db
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: system-erp-db
+          property: port
+
+  - type: web
+    name: system-erp-frontend
+    region: singapore
+    runtime: docker
+    plan: starter
+    branch: main
+    dockerfilePath: frontend/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://system-erp-backend.onrender.com/api

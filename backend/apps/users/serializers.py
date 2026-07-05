@@ -46,18 +46,22 @@ class LoginSerializer(TokenObtainPairSerializer):
         self.fields.pop('username', None)
 
     def validate(self, attrs):
-        authenticate_kwargs = {
-            'email': attrs.get('email'),
-            'password': attrs.get('password')
-        }
-        user = authenticate(**authenticate_kwargs)
-        if not user:
+        email = attrs.get('email')
+        password = attrs.get('password')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            user = None
+        if not user or not user.check_password(password):
             raise serializers.ValidationError('INVALID CREDENTIALS')
         if not user.is_active:
             raise serializers.ValidationError('ACCOUNT DISABLED')
-        data = super().validate(user)
-        data.update({'user': UserSerializer(user).data})
-        return data
+        refresh = self.get_token(user)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': user,
+        }
 
 class AuditSerializer(serializers.Serializer):
     message = serializers.CharField()

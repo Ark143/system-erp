@@ -29,7 +29,11 @@ def login_view(request):
     serializer.is_valid(raise_exception=True)
     user = serializer.validated_data['user']
     log_action(user, 'LOGIN', request)
-    return Response(serializer.validated_data, status=status.HTTP_200_OK)
+    return Response({
+        'refresh': serializer.validated_data['refresh'],
+        'access': serializer.validated_data['access'],
+        'user': UserSerializer(user).data,
+    }, status=status.HTTP_200_OK)
 
 @api_view(['GET', 'PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
