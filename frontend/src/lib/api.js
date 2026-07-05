@@ -109,6 +109,34 @@ export const accounting = {
     cancel: (id) => action('/accounting/journal-entries/', id, 'cancel'),
   },
   trialBalance: () => axiosClient.get('/accounting/reports/trial-balance/').then(r => r.data),
+  exchangeRates: {
+    list: (params) => getList('/accounting/extra/exchange-rates/', params),
+    create: (payload) => createItem('/accounting/extra/exchange-rates/', payload),
+    update: (id, payload) => updateItem('/accounting/extra/exchange-rates/', id, payload),
+    remove: (id) => deleteItem('/accounting/extra/exchange-rates/', id),
+  },
+  currencies: {
+    list: (params) => getList('/accounting/extra/currencies/', params),
+    create: (payload) => createItem('/accounting/extra/currencies/', payload),
+    update: (id, payload) => updateItem('/accounting/extra/currencies/', id, payload),
+    remove: (id) => deleteItem('/accounting/extra/currencies/', id),
+  },
+  glDefaultAccounts: {
+    list: (params) => getList('/accounting/extra/gl-default-accounts/', params),
+    create: (payload) => createItem('/accounting/extra/gl-default-accounts/', payload),
+    update: (id, payload) => updateItem('/accounting/extra/gl-default-accounts/', id, payload),
+    remove: (id) => deleteItem('/accounting/extra/gl-default-accounts/', id),
+  },
+  paymentEntries: {
+    list: (params) => getList('/accounting/extra/payment-entries/', params),
+    create: (payload) => createItem('/accounting/extra/payment-entries/', payload),
+    update: (id, payload) => updateItem('/accounting/extra/payment-entries/', id, payload),
+  },
+  bankReconciliations: {
+    list: (params) => getList('/accounting/extra/bank-reconciliation/', params),
+    create: (payload) => createItem('/accounting/extra/bank-reconciliation/', payload),
+    update: (id, payload) => updateItem('/accounting/extra/bank-reconciliation/', id, payload),
+  },
 };
 
 export const workflow = {
@@ -120,6 +148,12 @@ export const workflow = {
     list: (params) => getList('/workflow/approvals/', params),
     decide: (id, payload) => action('/workflow/approvals/', id, 'partial_update', payload).catch(e => action('/workflow/approvals/', id, 'update', payload)),
   },
+};
+
+export const reports = {
+  generalLedger: () => axiosClient.get('/reports/general-ledger/').then(r => r.data),
+  trialBalance: () => axiosClient.get('/reports/trial-balance/').then(r => r.data),
+  financialReports: () => axiosClient.get('/reports/financial-reports/').then(r => r.data),
 };
 
 export const governance = {

@@ -9,6 +9,8 @@ import Purchasing from './pages/Purchasing.jsx';
 import Accounting from './pages/Accounting.jsx';
 import Workflow from './pages/Workflow.jsx';
 import Governance from './pages/Governance.jsx';
+import Reports from './pages/Reports.jsx';
+import Users from './pages/Users.jsx';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -24,11 +26,13 @@ function RoutesWithAuth() {
       <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="inventory" element={<Inventory />} />
-        <Route path="sales" element={<Sales />} />
-        <Route path="purchasing" element={<Purchasing />} />
+        <Route path="sales/*" element={<Sales />} />
+        <Route path="purchasing/*" element={<Purchasing />} />
         <Route path="accounting" element={<Accounting />} />
+        <Route path="reports" element={<Reports />} />
         <Route path="workflow" element={<Workflow />} />
         <Route path="governance" element={<Governance />} />
+        <Route path="users" element={<Users />} />
       </Route>
     </Routes>
   );
