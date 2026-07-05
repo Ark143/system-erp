@@ -356,27 +356,10 @@ export default function Governance() {
             <label className="mb-1 block text-xs font-semibold text-[var(--color-ink-secondary)]">{field.label}</label>
             <input
               className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--color-apple-blue)]"
-              value={
-                field.type === 'checkbox'
-                  ? ''
-                  : form[field.key] ?? ''
-              }
-              onChange={(e) => {
-                const next = { ...form, [field.key]: e.target.value };
-                setForm(next);
-              }}
-              type={field.type === 'checkbox' ? 'checkbox' : field.type || 'text'}
-              placeholder={field.type === 'checkbox' ? ' ' : undefined}
-              checked={
-                field.type === 'checkbox'
-                  ? !!form[field.key]
-                  : undefined
-              }
-              onCheckedChange={
-                field.type === 'checkbox'
-                  ? (val) => setForm({ ...form, [field.key]: val })
-                  : undefined
-              }
+              value={field.type === 'checkbox' ? '' : (form[field.key] ?? '')}
+              onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
+              type={field.type === 'checkbox' ? 'checkbox' : (field.type || 'text')}
+              checked={field.type === 'checkbox' ? !!form[field.key] : undefined}
             />
           </div>
         ))}
