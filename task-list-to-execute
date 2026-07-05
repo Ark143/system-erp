@@ -5,5 +5,8 @@ DONE: Governance Global Configurations & Master Governance module.
 DONE: Full auth + module endpoint QA with real data.
 DONE: Finalize /issue-logs.
 DONE: /status-project.
-IN_PROGRESS: Validate Docker compose docs when Docker is available.
-PENDING: Railway cloud deploy manual provisioning.
+DONE: Add frontend governance page, route, and api root.
+DONE: Live browser QA at http://localhost:5174.
+DONE: Validate docker-compose docs review.
+IN_PROGRESS: Railway cloud deploy manual provisioning skipped per user directive.
+PENDING: Push latest commits to GitHub remote.
