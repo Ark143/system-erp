@@ -3,43 +3,37 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
 from django.db.models import F
+from apps.users.rbac import ModuleRBAC
 from .models import Category, Item, StockMove
 from .serializers import CategorySerializer, ItemSerializer, StockMoveSerializer
-
 def is_admin_or_manager(user):
     return getattr(user, 'role', None) in ('ADMIN', 'MANAGER')
-
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, ModuleRBAC("inventory")]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'created_at']
-
     def get_permissions(self):
         if self.request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
             return [permissions.IsAdminUser()]
         return super().get_permissions()
-
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.select_related('category', 'created_by').all()
     serializer_class = ItemSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, ModuleRBAC("inventory")]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['sku', 'name']
     ordering_fields = ['sku', 'name', 'qty_on_hand', 'created_at']
-
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
-
     @transaction.atomic
     def perform_update(self, serializer):
         instance = serializer.save()
         if instance.is_active is False:
             instance.qty_on_hand = 0
             instance.save(update_fields=['qty_on_hand'])
-
     @action(detail=True, methods=['post'])
     def adjust(self, request, pk=None):
         item = self.get_object()
@@ -64,11 +58,10 @@ class ItemViewSet(viewsets.ModelViewSet):
             Item.objects.filter(pk=item.pk).update(qty_on_hand=F('qty_on_hand') - qty)
         item.refresh_from_db()
         return Response(ItemSerializer(item, context={'request': request}).data)
-
 class StockMoveViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = StockMove.objects.select_related('item', 'created_by').all()
     serializer_class = StockMoveSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, ModuleRBAC("inventory")]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['item__sku', 'item__name', 'reference']
     ordering_fields = ['created_at']

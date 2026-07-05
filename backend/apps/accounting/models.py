@@ -154,9 +154,38 @@ class BankReconciliationLine(models.Model):
     journal_entry = models.ForeignKey('accounting.JournalEntry', on_delete=models.PROTECT, related_name='reconciliation_lines')
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     cleared = models.BooleanField(default=False)
-
     class Meta:
         indexes = [models.Index(fields=['reconciliation', 'journal_entry'])]
-
     def __str__(self):
         return f"{self.reconciliation.recon_no} - {self.journal_entry.je_no}"
+
+
+class ExchangeRate(models.Model):
+    from_currency = models.CharField(max_length=3)
+    to_currency = models.CharField(max_length=3)
+    rate = models.DecimalField(max_digits=12, decimal_places=4)
+    rate_date = models.DateField()
+    class Meta:
+        ordering = ['-rate_date']
+    def __str__(self):
+        return f"{self.from_currency}->{self.to_currency} {self.rate}"
+
+
+class Currency(models.Model):
+    code = models.CharField(max_length=3, unique=True)
+    name = models.CharField(max_length=100)
+    symbol = models.CharField(max_length=10, blank=True)
+    is_active = models.BooleanField(default=True)
+    class Meta:
+        ordering = ['code']
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class GLDefaultAccount(models.Model):
+    account = models.ForeignKey('accounting.Account', on_delete=models.PROTECT, related_name='gl_defaults')
+    account_type = models.CharField(max_length=20, choices=Account.ACCOUNT_TYPE_CHOICES)
+    class Meta:
+        ordering = ['account__code']
+    def __str__(self):
+        return f"{self.account.code}: {self.account_type}"

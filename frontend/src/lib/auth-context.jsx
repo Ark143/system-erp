@@ -4,14 +4,15 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 async function request(path, options = {}) {
   const token = localStorage.getItem('access');
-  const headers = {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(options.headers || {}),
-  };
+  const headers = { ...(options.headers || {}) };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  if (options.body && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
-    credentials: 'same-origin',
+    
   });
   const text = await res.text();
   let data;

@@ -5,14 +5,12 @@ from rest_framework import status
 from rest_framework.permissions import IsAdminUser
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from apps.users.models import AuditLog
-
 def log_action(user, action, request=None, details=''):
     meta = {}
     if request:
         meta['ip_address'] = request.META.get('REMOTE_ADDR', '')
         meta['user_agent'] = request.META.get('HTTP_USER_AGENT', '')
     AuditLog.objects.create(user=user, action=action, **meta, details=details)
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
@@ -21,7 +19,6 @@ def register_view(request):
     user = serializer.save()
     log_action(user, 'REGISTER', request)
     return Response({'message': 'Account created', 'user': UserSerializer(user).data}, status=status.HTTP_201_CREATED)
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
@@ -40,7 +37,6 @@ def login_view(request):
       'access': validated['access'],
       'user': user_payload if isinstance(user_payload, dict) else UserSerializer(user_instance).data,
     }, status=status.HTTP_200_OK)
-
 @api_view(['GET', 'PUT', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def profile_view(request):
@@ -55,7 +51,6 @@ def profile_view(request):
     serializer.save()
     log_action(user, 'PROFILE_UPDATE', request)
     return Response(serializer.data)
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def users_list_view(request):
@@ -65,7 +60,6 @@ def users_list_view(request):
     users.objects = request.user.__class__
     qs = request.user.__class__.objects.all()
     return Response(UserSerializer(qs, many=True).data)
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def audit_logs_view(request):

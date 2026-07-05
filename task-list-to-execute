@@ -9,4 +9,5 @@ DONE: Add frontend governance page, route, and api root.
 DONE: Live browser QA at http://localhost:5174.
 DONE: Validate docker-compose docs review.
 IN_PROGRESS: Railway cloud deploy manual provisioning skipped per user directive.
-PENDING: Push latest commits to GitHub remote.
+12|DONE: Push latest commits to GitHub remote.
+13|

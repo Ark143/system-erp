@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import general_ledger, trial_balance, financial_reports
+from .views import GeneralLedgerView, TrialBalanceView, FinancialReportsView
 
 urlpatterns = [
-    path('general-ledger/', general_ledger),
-    path('trial-balance/', trial_balance),
-    path('financial-reports/', financial_reports),
+    path('general-ledger/', GeneralLedgerView.as_view()),
+    path('trial-balance/', TrialBalanceView.as_view()),
+    path('financial-reports/', FinancialReportsView.as_view()),
 ]
