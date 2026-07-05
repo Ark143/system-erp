@@ -3,6 +3,7 @@ DONE: Polish Apple theme globally.
 DONE: Render cloud deploy sequence.
 DONE: Governance Global Configurations & Master Governance module.
 DONE: Full auth + module endpoint QA with real data.
-IN_PROGRESS: Railway cloud deploy
-PENDING: Finalize /issue-logs and /status-project.
-PENDING: Validate Docker compose docs when Docker is available.
+DONE: Finalize /issue-logs.
+DONE: /status-project.
+IN_PROGRESS: Validate Docker compose docs when Docker is available.
+PENDING: Railway cloud deploy manual provisioning.
