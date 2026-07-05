@@ -121,3 +121,30 @@ export const workflow = {
     decide: (id, payload) => action('/workflow/approvals/', id, 'partial_update', payload).catch(e => action('/workflow/approvals/', id, 'update', payload)),
   },
 };
+
+export const governance = {
+  companies: {
+    list: (params) => getList('/governance/companies/', params),
+    create: (payload) => createItem('/governance/companies/', payload),
+    update: (id, payload) => updateItem('/governance/companies/', id, payload),
+    remove: (id) => deleteItem('/governance/companies/', id),
+  },
+  branches: {
+    list: (params) => getList('/governance/branches/', params),
+    create: (payload) => createItem('/governance/branches/', payload),
+    update: (id, payload) => updateItem('/governance/branches/', id, payload),
+    remove: (id) => deleteItem('/governance/branches/', id),
+  },
+  warehouses: {
+    list: (params) => getList('/governance/warehouses/', params),
+    create: (payload) => createItem('/governance/warehouses/', payload),
+    update: (id, payload) => updateItem('/governance/warehouses/', id, payload),
+    remove: (id) => deleteItem('/governance/warehouses/', id),
+  },
+  itemCategories: {
+    list: (params) => getList('/governance/item-categories/', params),
+    create: (payload) => createItem('/governance/item-categories/', payload),
+    update: (id, payload) => updateItem('/governance/item-categories/', id, payload),
+    remove: (id) => deleteItem('/governance/item-categories/', id),
+  },
+};

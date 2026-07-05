@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth-context.jsx';
-import { LayoutDashboard, Package, ShoppingCart, Truck, Calculator, CheckSquare, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Truck, Calculator, CheckSquare, LogOut, Shield } from 'lucide-react';
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -22,6 +22,7 @@ export default function Layout() {
           <NavLink to="/purchasing" className={({isActive}) => `${linkBase} ${isActive?active:base}`}><Truck size={18}/>Purchasing</NavLink>
           <NavLink to="/accounting" className={({isActive}) => `${linkBase} ${isActive?active:base}`}><Calculator size={18}/>Accounting</NavLink>
           <NavLink to="/workflow" className={({isActive}) => `${linkBase} ${isActive?active:base}`}><CheckSquare size={18}/>Workflow</NavLink>
+          <NavLink to="/governance" className={({isActive}) => `${linkBase} ${isActive?active:base}`}><Shield size={18}/>Governance</NavLink>
         </nav>
         <div className="p-3">
           <button onClick={doLogout} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-[var(--color-ink-secondary)] transition hover:bg-black/5">Logout</button>

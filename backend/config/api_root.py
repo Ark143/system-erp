@@ -7,5 +7,6 @@ def api_root(request):
         'sales': '/api/sales/',
         'purchasing': '/api/purchasing/',
         'accounting': '/api/accounting/',
+        'governance': '/api/governance/',
         'workflow': '/api/workflow/',
     })
