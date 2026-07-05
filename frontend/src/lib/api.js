@@ -156,6 +156,39 @@ export const reports = {
   financialReports: () => axiosClient.get('/reports/financial-reports/').then(r => r.data),
 };
 
+export const masterdata = {
+  taxes: {
+    list: (params) => getList('/masterdata/taxes/', params),
+    create: (payload) => createItem('/masterdata/taxes/', payload),
+    update: (id, payload) => updateItem('/masterdata/taxes/', id, payload),
+    remove: (id) => deleteItem('/masterdata/taxes/', id),
+  },
+  customers: {
+    list: (params) => getList('/masterdata/customers/', params),
+    create: (payload) => createItem('/masterdata/customers/', payload),
+    update: (id, payload) => updateItem('/masterdata/customers/', id, payload),
+    remove: (id) => deleteItem('/masterdata/customers/', id),
+  },
+  suppliers: {
+    list: (params) => getList('/masterdata/suppliers/', params),
+    create: (payload) => createItem('/masterdata/suppliers/', payload),
+    update: (id, payload) => updateItem('/masterdata/suppliers/', id, payload),
+    remove: (id) => deleteItem('/masterdata/suppliers/', id),
+  },
+  leads: {
+    list: (params) => getList('/masterdata/leads/', params),
+    create: (payload) => createItem('/masterdata/leads/', payload),
+    update: (id, payload) => updateItem('/masterdata/leads/', id, payload),
+    remove: (id) => deleteItem('/masterdata/leads/', id),
+  },
+  employees: {
+    list: (params) => getList('/masterdata/employees/', params),
+    create: (payload) => createItem('/masterdata/employees/', payload),
+    update: (id, payload) => updateItem('/masterdata/employees/', id, payload),
+    remove: (id) => deleteItem('/masterdata/employees/', id),
+  },
+};
+
 export const governance = {
   companies: {
     list: (params) => getList('/governance/companies/', params),

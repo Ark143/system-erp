@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'apps.purchasing',
     'apps.accounting',
     'apps.workflow',
+    'apps.masterdata',
     'apps.governance',
 ]
 

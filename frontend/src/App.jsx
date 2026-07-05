@@ -11,6 +11,7 @@ import Workflow from './pages/Workflow.jsx';
 import Governance from './pages/Governance.jsx';
 import Reports from './pages/Reports.jsx';
 import Users from './pages/Users.jsx';
+import MasterData from './pages/MasterData.jsx';
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -33,6 +34,7 @@ function RoutesWithAuth() {
         <Route path="workflow" element={<Workflow />} />
         <Route path="governance" element={<Governance />} />
         <Route path="users" element={<Users />} />
+        <Route path="masterdata/*" element={<MasterData />} />
       </Route>
     </Routes>
   );

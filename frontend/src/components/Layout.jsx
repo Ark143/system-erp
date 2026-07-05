@@ -107,6 +107,19 @@ const SECTIONS = [
       { key: 'role-permissions', label: 'Role Permissions', to: '/users/role-permissions' },
     ],
   },
+  {
+    key: 'masterdata',
+    label: 'Master Data',
+    icon: Users,
+    children: [
+      { key: 'import', label: 'Data Import', to: '/masterdata/import' },
+      { key: 'taxes', label: 'Taxes', to: '/masterdata/taxes' },
+      { key: 'customer', label: 'Customer', to: '/masterdata/customers' },
+      { key: 'supplier', label: 'Supplier', to: '/masterdata/suppliers' },
+      { key: 'leads', label: 'Leads', to: '/masterdata/leads' },
+      { key: 'employees', label: 'Employees', to: '/masterdata/employees' },
+    ],
+  },
 ];
 
 const linkBase = 'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold no-underline transition hover:bg-black/5';

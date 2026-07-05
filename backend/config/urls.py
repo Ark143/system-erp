@@ -14,4 +14,6 @@ urlpatterns = [
     path('api/reports/', include('apps.reports.urls')),
     path('api/governance/', include('apps.governance.urls')),
     path('api/workflow/', include('apps.workflow.urls')),
+
+    # DATA IMPORT TEMPLATE DOWNLOAD ENDPOINT
 ]
