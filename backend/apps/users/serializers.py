@@ -60,7 +60,7 @@ class LoginSerializer(TokenObtainPairSerializer):
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'user': user,
+            'user': UserSerializer(user).data,
         }
 
 class AuditSerializer(serializers.Serializer):

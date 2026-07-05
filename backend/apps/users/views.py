@@ -27,12 +27,18 @@ def register_view(request):
 def login_view(request):
     serializer = LoginSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user = serializer.validated_data['user']
-    log_action(user, 'LOGIN', request)
+    validated = serializer.validated_data
+    user_payload = validated['user']
+    if isinstance(user_payload, dict):
+      from django.contrib.auth import get_user_model
+      user_instance = get_user_model().objects.get(pk=user_payload['id'])
+    else:
+      user_instance = user_payload
+    log_action(user_instance, 'LOGIN', request)
     return Response({
-        'refresh': serializer.validated_data['refresh'],
-        'access': serializer.validated_data['access'],
-        'user': UserSerializer(user).data,
+      'refresh': validated['refresh'],
+      'access': validated['access'],
+      'user': user_payload if isinstance(user_payload, dict) else UserSerializer(user_instance).data,
     }, status=status.HTTP_200_OK)
 
 @api_view(['GET', 'PUT', 'PATCH'])
