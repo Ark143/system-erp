@@ -7,13 +7,8 @@ urlpatterns = [
     path('', api_root),
     path('api/auth/', include('apps.users.urls')),
     path('api/inventory/', include('apps.inventory.urls')),
-
-    path('api/sales/', include('apps.sales.urls')),
-    path('api/purchasing/', include('apps.purchasing.urls')),
-    path('api/accounting/extra/', include('apps.accounting.extra_urls')),
     path('api/reports/', include('apps.reports.urls')),
     path('api/governance/', include('apps.governance.urls')),
     path('api/workflow/', include('apps.workflow.urls')),
-
-    # DATA IMPORT TEMPLATE DOWNLOAD ENDPOINT
+    path('api/masterdata/', include('apps.masterdata.urls')),
 ]
