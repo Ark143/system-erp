@@ -14,10 +14,16 @@ class ExchangeRateSerializer(serializers.ModelSerializer):
         fields = ['id', 'from_currency', 'to_currency', 'rate', 'rate_date']
         read_only_fields = ['id']
 class CurrencySerializer(serializers.ModelSerializer):
+    is_base = serializers.BooleanField(read_only=True)
     class Meta:
         model = Currency
-        fields = ['id', 'code', 'name', 'symbol', 'is_active']
+        fields = ['id', 'code', 'name', 'symbol', 'is_active', 'is_base']
         read_only_fields = ['id']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['is_base'] = bool(data.get('code') == 'PHP')
+        return data
 class GLDefaultAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = GLDefaultAccount
@@ -95,6 +101,15 @@ class CurrencyViewSet(viewsets.ModelViewSet):
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
     permission_classes = [permissions.IsAuthenticated, ModuleRBAC("accounting")]
+
+    @action(detail=True, methods=["post"])
+    def set_base(self, request, pk=None):
+        if Currency.objects.filter(is_base=True).exclude(pk=pk).exists():
+            Currency.objects.filter(is_base=True).exclude(pk=pk).update(is_base=False)
+        instance = self.get_object()
+        instance.is_base = True
+        instance.save(update_fields=["is_base"])
+        return Response({"is_base": True})
 class GLDefaultAccountViewSet(viewsets.ModelViewSet):
     queryset = GLDefaultAccount.objects.all()
     serializer_class = GLDefaultAccountSerializer

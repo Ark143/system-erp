@@ -33,7 +33,7 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--color-surface)]">
-      <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-white p-8 shadow-sm">
+      <div className="w-full max-w-sm rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-8 shadow-sm">
         <div className="mb-6 text-center">
           <div className="text-lg font-bold tracking-tight text-[var(--color-ink)]">System erp</div>
           <p className="mt-1 text-sm text-[var(--color-ink-secondary)]">Sign in to continue</p>

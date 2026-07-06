@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as api from '../lib/api.js';
 import Modal from '../components/Modal.jsx';
 
+const fmtNum = (v) =>
+  typeof v === 'number'
+    ? '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '$0.00';
+
 export default function Purchasing() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState('prs');
   const [rows, setRows] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -12,6 +19,7 @@ export default function Purchasing() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({});
   const [lines, setLines] = useState([{ item: '', qty: 1, unit_cost: 0 }]);
+  const [editId, setEditId] = useState(null);
 
   const load = async () => {
     setError('');
@@ -21,7 +29,13 @@ export default function Purchasing() {
       } else if (tab === 'prs') {
         setRows(await api.purchasing.prs.list({ ordering: '-created_at' }));
       } else if (tab === 'pos') {
-        setRows(await api.purchasing.pos.list({ ordering: '-created_at' }));
+        setRows(await api.purchasing.purchaseOrders.list({ ordering: '-created_at' }));
+      } else if (tab === 'quotations') {
+        setRows(await api.purchasing.quotations.list({ ordering: '-created_at' }));
+      } else if (tab === 'grns') {
+        setRows(await api.purchasing.grns.list({ ordering: '-received_date' }));
+      } else if (tab === 'invoices') {
+        setRows(await api.purchasing.invoices.list({ ordering: '-invoice_date' }));
       }
     } catch (e) {
       setError(e?.response?.data?.detail || e.message || 'LOAD_FAILED');
@@ -68,6 +82,38 @@ export default function Purchasing() {
       const total = parseFloat(curr.qty || 0) * parseFloat(curr.unit_cost || 0);
       return acc + (total > 0 ? total : 0);
     }, 0);
+  };
+
+  const openCreate = () => {
+    setEditId(null);
+    setForm({ is_active: true });
+    setOpen(true);
+  };
+
+  const openEdit = (row) => {
+    setEditId(row.id);
+    setForm({ ...row });
+    setOpen(true);
+  };
+
+  const openDuplicate = async (row) => {
+    setError('');
+    try {
+      const data = await api.duplicateItem('/purchasing/suppliers/', row.id);
+      const src = data || row;
+      setEditId(null);
+      setForm({
+        code: (src.code || '') + ' COPY',
+        name: src.name ? src.name + ' Copy' : '',
+        email: src.email || '',
+        phone: src.phone || '',
+        address: src.address || '',
+        is_active: src.is_active !== false,
+      });
+      setOpen(true);
+    } catch (e) {
+      setError(e?.response?.data?.detail || e.message || 'DUPLICATE_FAILED');
+    }
   };
 
   const doCreate = async () => {
@@ -191,7 +237,11 @@ export default function Purchasing() {
   const submit = async (id) => {
     setError('');
     try {
-      await (tab === 'prs' ? api.purchasing.prs.submit(id) : api.purchasing.pos.submit(id));
+      if (tab === 'prs') await api.purchasing.prs.submit(id);
+      else if (tab === 'pos') await api.purchasing.purchaseOrders.submit(id);
+      else if (tab === 'quotations') await api.purchasing.quotations.submit(id);
+      else if (tab === 'grns') await api.purchasing.grns.update(id, { ...(await api.purchasing.grns.get(id)).data, status: 'RECEIVED' });
+      else if (tab === 'invoices') await api.purchasing.invoices.submit(id);
       load();
     } catch (e) {
       setError(e?.response?.data?.detail || 'ACTION_FAILED');
@@ -201,7 +251,10 @@ export default function Purchasing() {
   const approve = async (id) => {
     setError('');
     try {
-      await (tab === 'prs' ? api.purchasing.prs.approve(id) : api.purchasing.pos.approve(id));
+      if (tab === 'prs') await api.purchasing.prs.approve(id);
+      else if (tab === 'pos') await api.purchasing.purchaseOrders.approve(id);
+      else if (tab === 'quotations') await api.purchasing.quotations.approve(id);
+      else if (tab === 'invoices') await api.purchasing.invoices.approve(id);
       load();
     } catch (e) {
       setError(e?.response?.data?.detail || 'ACTION_FAILED');
@@ -211,7 +264,20 @@ export default function Purchasing() {
   const reject = async (id) => {
     setError('');
     try {
-      await (tab === 'prs' ? api.purchasing.prs.reject(id) : api.purchasing.pos.reject(id));
+      if (tab === 'prs') await api.purchasing.prs.reject(id);
+      else if (tab === 'pos') await api.purchasing.purchaseOrders.reject(id);
+      else if (tab === 'quotations') await api.purchasing.quotations.reject(id);
+      else if (tab === 'invoices') await api.purchasing.invoices.reject(id);
+      load();
+    } catch (e) {
+      setError(e?.response?.data?.detail || 'ACTION_FAILED');
+    }
+  };
+
+  const payInvoice = async (id) => {
+    setError('');
+    try {
+      await api.purchasing.invoices.mark_paid(id);
       load();
     } catch (e) {
       setError(e?.response?.data?.detail || 'ACTION_FAILED');
@@ -222,10 +288,10 @@ export default function Purchasing() {
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--color-border)] pb-4">
       <div>
         <h2 className="text-xl font-bold text-[var(--color-ink)]">Purchasing / Procure-to-Pay (P2P)</h2>
-        <p className="text-sm text-[var(--color-ink-secondary)]">Manage suppliers, purchase requisitions, and purchase orders.</p>
+        <p className="text-sm text-[var(--color-ink-secondary)]">Manage suppliers, purchase requisitions, orders, GRN, invoices, and quotations.</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        {['prs', 'pos', 'suppliers'].map((t) => (
+        {['prs', 'pos', 'grns', 'quotations', 'invoices', 'suppliers'].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -240,14 +306,23 @@ export default function Purchasing() {
         ))}
         <button
           onClick={() => {
-            setError('');
-            setForm(tab === 'prs' ? { required_date: new Date().toISOString().slice(0, 10) } : tab === 'pos' ? { po_date: new Date().toISOString().slice(0, 10) } : { is_active: true });
-            setLines([{ item: '', qty: 1, unit_cost: 0 }]);
-            setOpen(true);
+            if (tab === 'suppliers') {
+              openCreate();
+            } else if (tab === 'prs') {
+              navigate('/purchasing/prs/new');
+            } else if (tab === 'pos') {
+              navigate('/purchasing/pos/new');
+            } else if (tab === 'quotations') {
+              navigate('/purchasing/quotations/new');
+            } else if (tab === 'invoices') {
+              navigate('/purchasing/invoices/new');
+            } else if (tab === 'grns') {
+              navigate('/purchasing/grns/new');
+            }
           }}
           className="rounded-xl bg-[var(--color-apple-blue)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition"
         >
-          New {tab === 'prs' ? 'PR' : tab === 'pos' ? 'PO' : 'Supplier'}
+          New {tab === 'prs' ? 'PR' : tab === 'pos' ? 'PO' : tab === 'grns' ? 'GRN' : tab === 'quotations' ? 'Quotation' : tab === 'invoices' ? 'Invoice' : 'Supplier'}
         </button>
       </div>
     </div>
@@ -263,7 +338,7 @@ export default function Purchasing() {
       )}
 
       {/* Modal Form */}
-      <Modal open={open} title={tab === 'prs' ? 'Create Purchase Requisition' : tab === 'pos' ? 'Create Purchase Order' : 'Create Supplier'} onClose={() => setOpen(false)}>
+      <Modal open={open} title={editId ? 'Edit Supplier' : 'Create Supplier'} onClose={() => { setOpen(false); setEditId(null); }}>
         <div className="space-y-4 pt-2">
           {tab === 'suppliers' && (
             <>
@@ -330,139 +405,9 @@ export default function Purchasing() {
             </>
           )}
 
-          {(tab === 'prs' || tab === 'pos') && (
-            <>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-[var(--color-ink-secondary)] mb-1">
-                    {tab === 'prs' ? 'PR No *' : 'PO No *'}
-                  </label>
-                  <input
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white p-3 text-sm outline-none focus:border-[var(--color-apple-blue)]"
-                    placeholder={tab === 'prs' ? 'e.g. PR-0001' : 'e.g. PO-0001'}
-                    value={tab === 'prs' ? (form.pr_no || '') : (form.po_no || '')}
-                    onChange={(e) => setForm(tab === 'prs' ? { ...form, pr_no: e.target.value } : { ...form, po_no: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-[var(--color-ink-secondary)] mb-1">
-                    {tab === 'prs' ? 'Required Date *' : 'PO Date *'}
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white p-3 text-sm outline-none focus:border-[var(--color-apple-blue)]"
-                    value={tab === 'prs' ? (form.required_date || '') : (form.po_date || '')}
-                    onChange={(e) => setForm(tab === 'prs' ? { ...form, required_date: e.target.value } : { ...form, po_date: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              {tab === 'prs' ? (
-                <div>
-                  <label className="block text-xs font-semibold text-[var(--color-ink-secondary)] mb-1">Requesting Department *</label>
-                  <input
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white p-3 text-sm outline-none focus:border-[var(--color-apple-blue)]"
-                    placeholder="e.g. IT, Finance, Operations"
-                    value={form.department || ''}
-                    onChange={(e) => setForm({ ...form, department: e.target.value })}
-                  />
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-[var(--color-ink-secondary)] mb-1">Supplier *</label>
-                    <select
-                      className="w-full rounded-xl border border-[var(--color-border)] bg-white p-3 text-sm outline-none focus:border-[var(--color-apple-blue)]"
-                      value={form.supplier || ''}
-                      onChange={(e) => setForm({ ...form, supplier: e.target.value })}
-                    >
-                      <option value="">Select Supplier</option>
-                      {suppliers.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-[var(--color-ink-secondary)] mb-1">Source PR (Optional)</label>
-                    <select
-                      className="w-full rounded-xl border border-[var(--color-border)] bg-white p-3 text-sm outline-none focus:border-[var(--color-apple-blue)]"
-                      value={form.pr || ''}
-                      onChange={(e) => handlePrChange(e.target.value)}
-                    >
-                      <option value="">None</option>
-                      {prsList.map((pr) => (
-                        <option key={pr.id} value={pr.id}>{pr.pr_no} - {pr.department}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-semibold text-[var(--color-ink-secondary)] mb-1">Notes / Description</label>
-                <textarea
-                  className="w-full rounded-xl border border-[var(--color-border)] bg-white p-3 text-sm outline-none focus:border-[var(--color-apple-blue)] h-16 resize-none"
-                  placeholder="Additional context..."
-                  value={form.notes || ''}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                />
-              </div>
-
-              {/* Items Grid */}
-              <div className="border-t border-[var(--color-border)] pt-3">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink)]">Items to Procure</h4>
-                  <button onClick={addLine} className="text-xs font-semibold text-[var(--color-apple-blue)] hover:underline">+ Add Line</button>
-                </div>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {lines.map((line, idx) => (
-                    <div key={idx} className="flex gap-2 items-end border border-black/5 p-2 rounded-xl bg-black/[0.01]">
-                      <div className="flex-1">
-                        <label className="block text-[10px] font-bold text-[var(--color-ink-secondary)] mb-1">Item</label>
-                        <select
-                          className="w-full rounded-lg border border-[var(--color-border)] bg-white p-2 text-xs outline-none focus:border-[var(--color-apple-blue)]"
-                          value={line.item}
-                          onChange={(e) => updateLine(idx, 'item', e.target.value)}
-                        >
-                          <option value="">Select Item</option>
-                          {items.map((it) => (
-                            <option key={it.id} value={it.id}>{it.sku} - {it.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="w-16">
-                        <label className="block text-[10px] font-bold text-[var(--color-ink-secondary)] mb-1">Qty</label>
-                        <input
-                          type="number"
-                          className="w-full rounded-lg border border-[var(--color-border)] bg-white p-2 text-xs outline-none focus:border-[var(--color-apple-blue)]"
-                          value={line.qty}
-                          onChange={(e) => updateLine(idx, 'qty', e.target.value)}
-                        />
-                      </div>
-                      <div className="w-24">
-                        <label className="block text-[10px] font-bold text-[var(--color-ink-secondary)] mb-1">Est. Cost</label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          className="w-full rounded-lg border border-[var(--color-border)] bg-white p-2 text-xs outline-none focus:border-[var(--color-apple-blue)]"
-                          value={line.unit_cost}
-                          onChange={(e) => updateLine(idx, 'unit_cost', e.target.value)}
-                        />
-                      </div>
-                      <button onClick={() => removeLine(idx)} className="text-xs text-red-600 font-semibold p-2 hover:bg-red-50 rounded-lg">Delete</button>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-2 text-right text-xs font-bold text-[var(--color-ink)]">
-                  Total Valuation: ${calculateGrandTotal().toFixed(2)}
-                </div>
-              </div>
-            </>
-          )}
-
           <div className="flex gap-2 pt-2">
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => { setOpen(false); setEditId(null); }}
               className="flex-1 rounded-xl border border-[var(--color-border)] p-3 text-sm font-semibold text-[var(--color-ink-secondary)] hover:bg-black/5 transition"
             >
               Cancel
@@ -501,6 +446,37 @@ export default function Purchasing() {
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Actions</th>
                 </>
               )}
+              {tab === 'quotations' && (
+                <>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Quotation No</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Supplier</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Date</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Valid Until</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Total</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Status</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Actions</th>
+                </>
+              )}
+              {tab === 'grns' && (
+                <>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">GRN No</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Purchase Order</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Received Date</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Notes</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Actions</th>
+                </>
+              )}
+              {tab === 'invoices' && (
+                <>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Invoice No</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Supplier</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">PO</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Date</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Total</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Status</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Actions</th>
+                </>
+              )}
               {tab === 'suppliers' && (
                 <>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Code</th>
@@ -508,6 +484,7 @@ export default function Purchasing() {
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Email</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Phone</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Address</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Actions</th>
                 </>
               )}
             </tr>
@@ -588,6 +565,64 @@ export default function Purchasing() {
                     </td>
                   </>
                 )}
+                {tab === 'quotations' && (
+                  <>
+                    <td className="px-6 py-4 font-semibold text-[var(--color-ink)]">{r.quotation_no}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink)]">{r.supplier_name || `Supplier ID ${r.supplier}`}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.quotation_date}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.valid_until}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{fmtNum(r.grand_total)}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.status}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        {r.status === 'DRAFT' && (
+                          <button onClick={() => submit(r.id)} className="rounded-lg bg-black/5 px-3 py-1.5 text-xs font-semibold hover:bg-black/10 transition">Submit</button>
+                        )}
+                        {r.status === 'SUBMITTED' && (
+                          <>
+                            <button onClick={() => approve(r.id)} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 transition">Approve</button>
+                            <button onClick={() => reject(r.id)} className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition">Reject</button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </>
+                )}
+                {tab === 'grns' && (
+                  <>
+                    <td className="px-6 py-4 font-semibold text-[var(--color-ink)]">{r.grn_no}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink)]">{r.purchase_order_name || `PO ${r.purchase_order}`}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.received_date}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.notes || '—'}</td>
+                    <td className="px-6 py-4"><div className="flex gap-2"><button onClick={() => doRemove(r.id)} className="font-semibold text-red-600 hover:underline">Delete</button></div></td>
+                  </>
+                )}
+                {tab === 'invoices' && (
+                  <>
+                    <td className="px-6 py-4 font-semibold text-[var(--color-ink)]">{r.invoice_no}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink)]">{r.supplier_name || `Supplier ${r.supplier}`}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.purchase_order_name || r.purchase_order || '—'}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.invoice_date}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{fmtNum(r.invoice_total || r.balance || 0)}</td>
+                    <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.status}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        {r.status === 'DRAFT' && (
+                          <button onClick={() => submit(r.id)} className="rounded-lg bg-black/5 px-3 py-1.5 text-xs font-semibold hover:bg-black/10 transition">Submit</button>
+                        )}
+                        {r.status === 'SUBMITTED' && (
+                          <>
+                            <button onClick={() => approve(r.id)} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 transition">Approve</button>
+                            <button onClick={() => reject(r.id)} className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700 transition">Reject</button>
+                          </>
+                        )}
+                        {(r.status === 'APPROVED' || r.status === 'POSTED') && (
+                          <button onClick={() => payInvoice(r.id)} className="rounded-lg bg-black/5 px-3 py-1.5 text-xs font-semibold hover:bg-black/10 transition">Mark Paid</button>
+                        )}
+                      </div>
+                    </td>
+                  </>
+                )}
                 {tab === 'suppliers' && (
                   <>
                     <td className="px-6 py-4 font-semibold text-[var(--color-ink)]">{r.code}</td>
@@ -595,15 +630,20 @@ export default function Purchasing() {
                     <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.email || '—'}</td>
                     <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.phone || '—'}</td>
                     <td className="px-6 py-4 text-[var(--color-ink-secondary)] truncate max-w-xs">{r.address || '—'}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(r)} className="font-semibold text-[var(--color-apple-blue)] hover:underline">Edit</button>
+                        <button onClick={() => openDuplicate(r)} className="font-semibold text-[var(--color-ink)] hover:underline">Duplicate</button>
+                        <button onClick={async () => { await api.purchasing.suppliers.remove(r.id); load(); }} className="font-semibold text-red-600 hover:underline">Delete</button>
+                      </div>
+                    </td>
                   </>
                 )}
               </tr>
             ))}
             {!rows?.length && (
               <tr>
-                <td colSpan="10" className="px-6 py-12 text-center text-[var(--color-ink-secondary)] font-medium">
-                  No records found
-                </td>
+                <td colSpan="10" className="px-6 py-12 text-center text-[var(--color-ink-secondary)] font-medium">No records found</td>
               </tr>
             )}
           </tbody>

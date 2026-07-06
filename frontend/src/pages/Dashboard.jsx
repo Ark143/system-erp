@@ -26,7 +26,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-4 gap-4">
         {cards.map((card) => (
-          <div key={card.title} className="rounded-2xl border border-[var(--color-border)] bg-white p-5 shadow-sm">
+          <div key={card.title} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="text-sm font-medium text-[var(--color-ink-secondary)]">{card.title}</div>
               <card.icon className={`h-5 w-5 ${card.color}`}/>
@@ -36,7 +36,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-6 shadow-sm">
         <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-ink-secondary)]">Sales vs Purchases</h3>
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">

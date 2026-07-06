@@ -1,0 +1,100 @@
+ID	Account Name	Company	Parent Account	Disable	Account Number	Is Group	Root Type	Report Type	Currency	Account Category	Account Type	Tax Rate	Frozen	Balance must be	Old Parent	Include in gross
+1000 - Application of Funds (Assets) - JMIT	Application of Funds (Assets)	JMIT		0	1000	1	Asset	Balance Sheet	PHP			0	No		0
+1100-1600 - Current Assets - JMIT	Current Assets	JMIT	1000 - Application of Funds (Assets) - JMIT	0	1100-1600	1	Asset	Balance Sheet	PHP			0	No		0
+1100 - Cash In Hand - JMIT	Cash In Hand	JMIT	1100-1600 - Current Assets - JMIT	0	1100	1	Asset	Balance Sheet	PHP	Cash and Cash Equivalents	Cash	0	No		0
+1110 - Cash - JMIT	Cash	JMIT	1100 - Cash In Hand - JMIT	0	1110	0	Asset	Balance Sheet	PHP	Cash and Cash Equivalents	Cash	0	No		0
+1200 - Bank Accounts - JMIT	Bank Accounts	JMIT	1100-1600 - Current Assets - JMIT	0	1200	1	Asset	Balance Sheet	PHP	Cash and Cash Equivalents	Bank	0	No		0
+1300 - Accounts Receivable - JMIT	Accounts Receivable	JMIT	1100-1600 - Current Assets - JMIT	0	1300	1	Asset	Balance Sheet	PHP			0	No		0
+1310 - Debtors - JMIT	Debtors	JMIT	1300 - Accounts Receivable - JMIT	0	1310	0	Asset	Balance Sheet	PHP	Trade Receivables	Receivable	0	No		0
+1400 - Stock Assets - JMIT	Stock Assets	JMIT	1100-1600 - Current Assets - JMIT	0	1400	1	Asset	Balance Sheet	PHP	Stock Assets	Stock	0	No		0
+1410 - Stock In Hand - JMIT	Stock In Hand	JMIT	1400 - Stock Assets - JMIT	0	1410	0	Asset	Balance Sheet	PHP	Stock Assets	Stock	0	No		0
+1500 - Tax Assets - JMIT	Tax Assets	JMIT	1100-1600 - Current Assets - JMIT	0	1500	1	Asset	Balance Sheet	PHP	Other Current Assets		0	No		0
+1600 - Loans and Advances (Assets) - JMIT	Loans and Advances (Assets)	JMIT	1100-1600 - Current Assets - JMIT	0	1600	1	Asset	Balance Sheet	PHP			0	No		0
+1610 - Employee Advances - JMIT	Employee Advances	JMIT	1600 - Loans and Advances (Assets) - JMIT	0	1610	0	Asset	Balance Sheet	PHP	Other Receivables	Payable	0	No		0
+1650 - Securities and Deposits - JMIT	Securities and Deposits	JMIT	1100-1600 - Current Assets - JMIT	0	1650	1	Asset	Balance Sheet	PHP			0	No		0
+1651 - Earnest Money - JMIT	Earnest Money	JMIT	1650 - Securities and Deposits - JMIT	0	1651	0	Asset	Balance Sheet	PHP	Other Current Assets		0	No		0
+1660 - Prepaid Expenses - JMIT	Prepaid Expenses	JMIT	1100-1600 - Current Assets - JMIT	0	1660	0	Asset	Balance Sheet	PHP	Other Current Assets		0	No		0
+1670 - Short-term Investments - JMIT	Short-term Investments	JMIT	1100-1600 - Current Assets - JMIT	0	1670	0	Asset	Balance Sheet	PHP	Short-term Investments		0	No		0
+1700 - Fixed Assets - JMIT	Fixed Assets	JMIT	1000 - Application of Funds (Assets) - JMIT	0	1700	1	Asset	Balance Sheet	PHP			0	No		0
+1710 - Capital Equipment - JMIT	Capital Equipment	JMIT	1700 - Fixed Assets - JMIT	0	1710	0	Asset	Balance Sheet	PHP	Tangible Assets	Fixed Asset	0	No		0
+1720 - Electronic Equipment - JMIT	Electronic Equipment	JMIT	1700 - Fixed Assets - JMIT	0	1720	0	Asset	Balance Sheet	PHP	Tangible Assets	Fixed Asset	0	No		0
+1730 - Furniture and Fixtures - JMIT	Furniture and Fixtures	JMIT	1700 - Fixed Assets - JMIT	0	1730	0	Asset	Balance Sheet	PHP	Tangible Assets	Fixed Asset	0	No		0
+1740 - Office Equipment - JMIT	Office Equipment	JMIT	1700 - Fixed Assets - JMIT	0	1740	0	Asset	Balance Sheet	PHP	Tangible Assets	Fixed Asset	0	No		0
+1750 - Plants and Machineries - JMIT	Plants and Machineries	JMIT	1700 - Fixed Assets - JMIT	0	1750	0	Asset	Balance Sheet	PHP	Tangible Assets	Fixed Asset	0	No		0
+1760 - Buildings - JMIT	Buildings	JMIT	1700 - Fixed Assets - JMIT	0	1760	0	Asset	Balance Sheet	PHP	Tangible Assets	Fixed Asset	0	No		0
+1770 - Software - JMIT	Software	JMIT	1700 - Fixed Assets - JMIT	0	1770	0	Asset	Balance Sheet	PHP	Intangible Assets	Fixed Asset	0	No		0
+1780 - Accumulated Depreciation - JMIT	Accumulated Depreciation	JMIT	1700 - Fixed Assets - JMIT	0	1780	0	Asset	Balance Sheet	PHP	Tangible Assets	Accumulated Depreciation	0	No		0
+1790 - CWIP Account - JMIT	CWIP Account	JMIT	1700 - Fixed Assets - JMIT	0	1790	0	Asset	Balance Sheet	PHP	Tangible Assets	Capital Work in Progress	0	No		0
+1800 - Investments - JMIT	Investments	JMIT	1000 - Application of Funds (Assets) - JMIT	0	1800	1	Asset	Balance Sheet	PHP	Long-term Investments		0	No		0
+1900 - Temporary Accounts - JMIT	Temporary Accounts	JMIT	1000 - Application of Funds (Assets) - JMIT	0	1900	1	Asset	Balance Sheet	PHP			0	No		0
+1910 - Temporary Opening - JMIT	Temporary Opening	JMIT	1900 - Temporary Accounts - JMIT	0	1910	0	Asset	Balance Sheet	PHP	Other Non-current Assets	Temporary	0	No		0
+2000 - Source of Funds (Liabilities) - JMIT	Source of Funds (Liabilities)	JMIT		0	2000	1	Liability	Balance Sheet	PHP			0	No		0
+2100-2400 - Current Liabilities - JMIT	Current Liabilities	JMIT	2000 - Source of Funds (Liabilities) - JMIT	0	2100-2400	1	Liability	Balance Sheet	PHP			0	No		0
+2100 - Accounts Payable - JMIT	Accounts Payable	JMIT	2100-2400 - Current Liabilities - JMIT	0	2100	1	Liability	Balance Sheet	PHP			0	No		0
+2110 - Creditors - JMIT	Creditors	JMIT	2100 - Accounts Payable - JMIT	0	2110	0	Liability	Balance Sheet	PHP	Trade Payables	Payable	0	No		0
+2120 - Payroll Payable - JMIT	Payroll Payable	JMIT	2100 - Accounts Payable - JMIT	0	2120	0	Liability	Balance Sheet	PHP	Other Payables	Payable	0	No		0
+2150 - Accrued Expenses - JMIT	Accrued Expenses	JMIT	2100-2400 - Current Liabilities - JMIT	0	2150	0	Liability	Balance Sheet	PHP	Other Current Liabilities		0	No		0
+2160 - Customer Advances - JMIT	Customer Advances	JMIT	2100-2400 - Current Liabilities - JMIT	0	2160	0	Liability	Balance Sheet	PHP	Other Current Liabilities		0	No		0
+2200 - Stock Liabilities - JMIT	Stock Liabilities	JMIT	2100-2400 - Current Liabilities - JMIT	0	2200	1	Liability	Balance Sheet	PHP			0	No		0
+2210 - Stock Received But Not Billed - JMIT	Stock Received But Not Billed	JMIT	2200 - Stock Liabilities - JMIT	0	2210	0	Liability	Balance Sheet	PHP	Trade Payables	Stock Received But Not Billed	0	No		0
+2211 - Asset Received But Not Billed - JMIT	Asset Received But Not Billed	JMIT	2200 - Stock Liabilities - JMIT	0	2211	0	Liability	Balance Sheet	PHP	Trade Payables	Asset Received But Not Billed	0	No		0
+2300 - Duties and Taxes - JMIT	Duties and Taxes	JMIT	2100-2400 - Current Liabilities - JMIT	0	2300	1	Liability	Balance Sheet	PHP	Current Tax Liabilities	Tax	0	No		0
+2310 - TDS Payable - JMIT	TDS Payable	JMIT	2300 - Duties and Taxes - JMIT	0	2310	0	Liability	Balance Sheet	PHP	Current Tax Liabilities		0	No		0
+VAT - JMIT	VAT	JMIT	2300 - Duties and Taxes - JMIT	0		0	Liability	Balance Sheet		Tax	Tax	12	No		0
+CWT Tax - JMIT	CWT Tax	JMIT	2300 - Duties and Taxes - JMIT	0		0	Liability	Balance Sheet	PHP	Current Tax Liabilities	Tax	0	No		0
+EWT Tax - JMIT	EWT Tax	JMIT	2300 - Duties and Taxes - JMIT	0		0	Liability	Balance Sheet	PHP	Current Tax Liabilities	Tax	0	No		0
+2350 - Short-term Provisions - JMIT	Short-term Provisions	JMIT	2100-2400 - Current Liabilities - JMIT	0	2350	0	Liability	Balance Sheet	PHP	Short-term Provisions		0	No		0
+2400 - Loans (Liabilities) - JMIT	Loans (Liabilities)	JMIT	2100-2400 - Current Liabilities - JMIT	0	2400	1	Liability	Balance Sheet	PHP			0	No		0
+2410 - Secured Loans - JMIT	Secured Loans	JMIT	2400 - Loans (Liabilities) - JMIT	0	2410	0	Liability	Balance Sheet	PHP	Long-term Borrowings		0	No		0
+2420 - Unsecured Loans - JMIT	Unsecured Loans	JMIT	2400 - Loans (Liabilities) - JMIT	0	2420	0	Liability	Balance Sheet	PHP	Long-term Borrowings		0	No		0
+2430 - Bank Overdraft Account - JMIT	Bank Overdraft Account	JMIT	2400 - Loans (Liabilities) - JMIT	0	2430	0	Liability	Balance Sheet	PHP	Short-term Borrowings		0	No		0
+2500 - Non-Current Liabilities - JMIT	Non-Current Liabilities	JMIT	2000 - Source of Funds (Liabilities) - JMIT	0	2500	1	Liability	Balance Sheet	PHP			0	No		0
+2510 - Long-term Provisions - JMIT	Long-term Provisions	JMIT	2500 - Non-Current Liabilities - JMIT	0	2510	0	Liability	Balance Sheet	PHP	Long-term Provisions		0	No		0
+2520 - Employee Benefits Obligation - JMIT	Employee Benefits Obligation	JMIT	2500 - Non-Current Liabilities - JMIT	0	2520	0	Liability	Balance Sheet	PHP	Other Non-current Liabilities		0	No		0
+3000 - Equity - JMIT	Equity	JMIT		0	3000	1	Equity	Balance Sheet	PHP			0	No		0
+3100 - Capital Stock - JMIT	Capital Stock	JMIT	3000 - Equity - JMIT	0	3100	0	Equity	Balance Sheet	PHP	Share Capital	Equity	0	No		0
+3200 - Dividends Paid - JMIT	Dividends Paid	JMIT	3000 - Equity - JMIT	0	3200	0	Equity	Balance Sheet	PHP	Reserves and Surplus	Equity	0	No		0
+3300 - Opening Balance Equity - JMIT	Opening Balance Equity	JMIT	3000 - Equity - JMIT	0	3300	0	Equity	Balance Sheet	PHP	Reserves and Surplus	Equity	0	No		0
+3400 - Retained Earnings - JMIT	Retained Earnings	JMIT	3000 - Equity - JMIT	0	3400	0	Equity	Balance Sheet	PHP	Reserves and Surplus	Equity	0	No		0
+3500 - Revaluation Surplus - JMIT	Revaluation Surplus	JMIT	3000 - Equity - JMIT	0	3500	0	Equity	Balance Sheet	PHP	Reserves and Surplus	Equity	0	No		0
+4000 - Income - JMIT	Income	JMIT		0	4000	1	Income	Profit and Loss	PHP			0	No		0
+4100 - Direct Income - JMIT	Direct Income	JMIT	4000 - Income - JMIT	0	4100	1	Income	Profit and Loss	PHP			0	No		0
+4110 - Sales - JMIT	Sales	JMIT	4100 - Direct Income - JMIT	0	4110	0	Income	Profit and Loss	PHP	Revenue from Operations		0	No		0
+4120 - Service - JMIT	Service	JMIT	4100 - Direct Income - JMIT	0	4120	0	Income	Profit and Loss	PHP	Revenue from Operations		0	No		0
+4200 - Indirect Income - JMIT	Indirect Income	JMIT	4000 - Income - JMIT	0	4200	1	Income	Profit and Loss	PHP			0	No		0
+4210 - Interest Income - JMIT	Interest Income	JMIT	4200 - Indirect Income - JMIT	0	4210	0	Income	Profit and Loss	PHP	Investment Income		0	No		0
+4220 - Interest on Fixed Deposits - JMIT	Interest on Fixed Deposits	JMIT	4200 - Indirect Income - JMIT	0	4220	0	Income	Profit and Loss	PHP	Investment Income		0	No		0
+4230 - Unrealized Gain/Loss - JMIT	Unrealized Gain/Loss	JMIT	4200 - Indirect Income - JMIT	0	4230	0	Asset	Profit and Loss				0	No		4200 - Indirect Income - JMIT	0
+5000 - Expenses - JMIT	Expenses	JMIT		0	5000	1	Expense	Profit and Loss	PHP			0	No		0
+5100 - Direct Expenses - JMIT	Direct Expenses	JMIT	5000 - Expenses - JMIT	0	5100	1	Expense	Profit and Loss	PHP			0	No		0
+5110 - Stock Expenses - JMIT	Stock Expenses	JMIT	5100 - Direct Expenses - JMIT	0	5110	1	Expense	Profit and Loss	PHP			0	No		0
+5111 - Cost of Goods Sold - JMIT	Cost of Goods Sold	JMIT	5110 - Stock Expenses - JMIT	0	5111	0	Expense	Profit and Loss	PHP	Cost of Goods Sold	Cost of Goods Sold	0	No		0
+5112 - Expenses Included In Asset Valuation - JMIT	Expenses Included In Asset Valuation	JMIT	5110 - Stock Expenses - JMIT	0	5112	0	Expense	Profit and Loss	PHP	Other Direct Costs	Expenses Included In Asset Valuation	0	No		0
+5118 - Expenses Included In Valuation - JMIT	Expenses Included In Valuation	JMIT	5110 - Stock Expenses - JMIT	0	5118	0	Expense	Profit and Loss	PHP	Other Direct Costs	Expenses Included In Valuation	0	No		0
+5119 - Stock Adjustment - JMIT	Stock Adjustment	JMIT	5110 - Stock Expenses - JMIT	0	5119	0	Expense	Profit and Loss	PHP	Other Direct Costs	Stock Adjustment	0	No		0
+5200 - Indirect Expenses - JMIT	Indirect Expenses	JMIT	5000 - Expenses - JMIT	0	5200	1	Expense	Profit and Loss	PHP			0	No		0
+5201 - Administrative Expenses - JMIT	Administrative Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5201	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5202 - Commission on Sales - JMIT	Commission on Sales	JMIT	5200 - Indirect Expenses - JMIT	0	5202	0	Expense	Profit and Loss	PHP	Operating Expenses	Chargeable	0	No		0
+5203 - Depreciation - JMIT	Depreciation	JMIT	5200 - Indirect Expenses - JMIT	0	5203	0	Expense	Profit and Loss	PHP	Operating Expenses	Depreciation	0	No		0
+5204 - Entertainment Expenses - JMIT	Entertainment Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5204	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5205 - Freight and Forwarding Charges - JMIT	Freight and Forwarding Charges	JMIT	5200 - Indirect Expenses - JMIT	0	5205	0	Expense	Profit and Loss	PHP	Operating Expenses	Chargeable	0	No		0
+5206 - Legal Expenses - JMIT	Legal Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5206	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5207 - Marketing Expenses - JMIT	Marketing Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5207	0	Expense	Profit and Loss	PHP	Operating Expenses	Chargeable	0	No		0
+5208 - Office Maintenance Expenses - JMIT	Office Maintenance Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5208	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5209 - Office Rent - JMIT	Office Rent	JMIT	5200 - Indirect Expenses - JMIT	0	5209	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5210 - Postal Expenses - JMIT	Postal Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5210	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5211 - Print and Stationery - JMIT	Print and Stationery	JMIT	5200 - Indirect Expenses - JMIT	0	5211	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5212 - Round Off - JMIT	Round Off	JMIT	5200 - Indirect Expenses - JMIT	0	5212	0	Expense	Profit and Loss	PHP	Operating Expenses	Round Off	0	No		0
+5213 - Salary - JMIT	Salary	JMIT	5200 - Indirect Expenses - JMIT	0	5213	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5214 - Sales Expenses - JMIT	Sales Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5214	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5215 - Telephone Expenses - JMIT	Telephone Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5215	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5216 - Travel Expenses - JMIT	Travel Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5216	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5217 - Utility Expenses - JMIT	Utility Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5217	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5218 - Write Off - JMIT	Write Off	JMIT	5200 - Indirect Expenses - JMIT	0	5218	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5219 - Exchange Gain/Loss - JMIT	Exchange Gain/Loss	JMIT	5200 - Indirect Expenses - JMIT	0	5219	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5220 - Interest Expense - JMIT	Interest Expense	JMIT	5200 - Indirect Expenses - JMIT	0	5220	0	Expense	Profit and Loss	PHP	Finance Costs		0	No		0
+5221 - Bank Charges - JMIT	Bank Charges	JMIT	5200 - Indirect Expenses - JMIT	0	5221	0	Expense	Profit and Loss	PHP	Finance Costs		0	No		0
+5222 - Gain/Loss on Asset Disposal - JMIT	Gain/Loss on Asset Disposal	JMIT	5200 - Indirect Expenses - JMIT	0	5222	0	Expense	Profit and Loss	PHP	Other Operating Income		0	No		0
+5223 - Miscellaneous Expenses - JMIT	Miscellaneous Expenses	JMIT	5200 - Indirect Expenses - JMIT	0	5223	0	Expense	Profit and Loss	PHP	Operating Expenses	Chargeable	0	No		0
+5224 - Impairment - JMIT	Impairment	JMIT	5200 - Indirect Expenses - JMIT	0	5224	0	Expense	Profit and Loss	PHP	Operating Expenses		0	No		0
+5225 - Tax Expense - JMIT	Tax Expense	JMIT	5200 - Indirect Expenses - JMIT	0	5225	0	Expense	Profit and Loss	PHP	Tax Expense		0	No		0

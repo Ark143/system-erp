@@ -11,6 +11,7 @@ export default function Sales() {
   const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({});
+  const [editId, setEditId] = useState(null);
   const [orderLines, setOrderLines] = useState([{ item: '', qty: 1, unit_price: 0, discount: 0 }]);
 
   const load = async () => {
@@ -70,21 +71,55 @@ export default function Sales() {
     }, 0);
   };
 
-  const doCreate = async () => {
+  const openCreate = () => {
+    setEditId(null);
+    setForm(tab === 'orders' ? { order_date: new Date().toISOString().slice(0, 10) } : tab === 'invoices' ? { invoice_date: new Date().toISOString().slice(0, 10) } : {});
+    setOpen(true);
+  };
+
+  const openEdit = (row) => {
+    setEditId(row.id);
+    setForm({ ...row });
+    setOpen(true);
+  };
+
+  const openDuplicate = async (row) => {
+    setError('');
+    try {
+      const data = await api.duplicateItem('/sales/customers/', row.id);
+      const src = data || row;
+      setEditId(null);
+      setForm({
+        code: (src.code || '') + ' COPY',
+        name: src.name ? src.name + ' Copy' : '',
+        email: src.email || '',
+        phone: src.phone || '',
+        address: src.address || '',
+        is_active: src.is_active !== false,
+      });
+      setOpen(true);
+    } catch (e) {
+      setError(e?.response?.data?.detail || e.message || 'DUPLICATE_FAILED');
+    }
+  };
+
+  const doSave = async () => {
     setError('');
     try {
       if (tab === 'customers') {
         if (!form.code || !form.name) {
           throw new Error('Customer Code and Name are required.');
         }
-        await api.sales.customers.create({
+        const payload = {
           code: form.code,
           name: form.name,
           email: form.email || '',
           phone: form.phone || '',
           address: form.address || '',
-          is_active: form.is_active !== false
-        });
+          is_active: form.is_active !== false,
+        };
+        if (editId) await api.sales.customers.update(editId, payload);
+        else await api.sales.customers.create(payload);
       } else if (tab === 'orders') {
         if (!form.order_no || !form.customer || !form.order_date) {
           throw new Error('Please enter Order No., Customer, and Order Date.');
@@ -94,40 +129,49 @@ export default function Sales() {
           throw new Error('Please add at least one valid item line.');
         }
 
-        // Create the Sales Order
-        const newOrder = await api.sales.orders.create({
+        const orderPayload = {
           order_no: form.order_no,
           customer: parseInt(form.customer),
           order_date: form.order_date,
-          status: 'DRAFT',
+          status: editId ? (form.status || 'DRAFT') : 'DRAFT',
           total_amount: 0,
           tax_amount: 0,
-          grand_total: 0
-        });
+          grand_total: 0,
+        };
 
-        // Create Order Items
+        let orderId = editId;
+        if (!orderId) {
+          const newOrder = await api.sales.orders.create(orderPayload);
+          orderId = newOrder.id;
+        } else {
+          await api.sales.orders.update(orderId, orderPayload);
+        }
+
         for (const line of filteredLines) {
           await api.sales.orderItems.create({
-            sales_order: newOrder.id,
+            sales_order: orderId,
             item: parseInt(line.item),
             qty: parseFloat(line.qty),
             unit_price: parseFloat(line.unit_price),
             discount: parseFloat(line.discount || 0),
-            line_total: (parseFloat(line.qty) * parseFloat(line.unit_price)) - parseFloat(line.discount || 0)
+            line_total: (parseFloat(line.qty) * parseFloat(line.unit_price)) - parseFloat(line.discount || 0),
           });
         }
       } else if (tab === 'invoices') {
         if (!form.invoice_no || !form.sales_order || !form.customer || !form.invoice_date) {
           throw new Error('Please enter Invoice No., Sales Order, Customer, and Invoice Date.');
         }
-        await api.sales.invoices.create({
+        const payload = {
           invoice_no: form.invoice_no,
           sales_order: parseInt(form.sales_order),
           customer: parseInt(form.customer),
-          invoice_date: form.invoice_date
-        });
+          invoice_date: form.invoice_date,
+        };
+        if (editId) await api.sales.invoices.update(editId, payload);
+        else await api.sales.invoices.create(payload);
       }
       setOpen(false);
+      setEditId(null);
       setForm({});
       setOrderLines([{ item: '', qty: 1, unit_price: 0, discount: 0 }]);
       load();
@@ -169,18 +213,11 @@ export default function Sales() {
 
   const handleOrderChange = (orderId) => {
     const selectedOrder = ordersList.find(o => o.id === parseInt(orderId));
-    if (selectedOrder) {
-      setForm({
-        ...form,
-        sales_order: orderId,
-        customer: selectedOrder.customer
-      });
-    } else {
-      setForm({
-        ...form,
-        sales_order: orderId
-      });
-    }
+    setForm({
+      ...form,
+      sales_order: orderId,
+      customer: selectedOrder?.customer ?? form.customer,
+    });
   };
 
   const header = (
@@ -195,21 +232,14 @@ export default function Sales() {
             key={t}
             onClick={() => setTab(t)}
             className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-              tab === t
-                ? 'bg-black text-white'
-                : 'bg-black/5 text-[var(--color-ink-secondary)] hover:bg-black/10'
+              tab === t ? 'bg-black text-white' : 'bg-black/5 text-[var(--color-ink-secondary)] hover:bg-black/10'
             }`}
           >
             {t}
           </button>
         ))}
         <button
-          onClick={() => {
-            setError('');
-            setForm(tab === 'orders' ? { order_date: new Date().toISOString().slice(0, 10) } : tab === 'invoices' ? { invoice_date: new Date().toISOString().slice(0, 10) } : { is_active: true });
-            setOrderLines([{ item: '', qty: 1, unit_price: 0, discount: 0 }]);
-            setOpen(true);
-          }}
+          onClick={openCreate}
           className="rounded-xl bg-[var(--color-apple-blue)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition"
         >
           New {tab.slice(0, -1)}
@@ -227,8 +257,7 @@ export default function Sales() {
         </div>
       )}
 
-      {/* Modal Form */}
-      <Modal open={open} title={`Create New ${tab.slice(0, -1)}`} onClose={() => setOpen(false)}>
+      <Modal open={open} title={editId ? `Edit ${tab.slice(0, -1)}` : `Create New ${tab.slice(0, -1)}`} onClose={() => { setOpen(false); setEditId(null); }}>
         <div className="space-y-4 pt-2">
           {tab === 'customers' && (
             <>
@@ -331,7 +360,6 @@ export default function Sales() {
                 </select>
               </div>
 
-              {/* Order Items Section */}
               <div className="border-t border-[var(--color-border)] pt-3">
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-ink)]">Order Items</h4>
@@ -444,13 +472,13 @@ export default function Sales() {
 
           <div className="flex gap-2 pt-2">
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => { setOpen(false); setEditId(null); }}
               className="flex-1 rounded-xl border border-[var(--color-border)] p-3 text-sm font-semibold text-[var(--color-ink-secondary)] hover:bg-black/5 transition"
             >
               Cancel
             </button>
             <button
-              onClick={doCreate}
+              onClick={doSave}
               className="flex-1 rounded-xl bg-black p-3 text-sm font-semibold text-white hover:opacity-90 transition"
             >
               Confirm
@@ -459,7 +487,6 @@ export default function Sales() {
         </div>
       </Modal>
 
-      {/* Data Table */}
       <div className="rounded-2xl border border-[var(--color-border)] bg-white shadow-sm overflow-x-auto">
         <table className="min-w-full text-left text-sm whitespace-nowrap">
           <thead>
@@ -481,6 +508,7 @@ export default function Sales() {
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Email</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Phone</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Address</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Actions</th>
                 </>
               )}
               {tab === 'invoices' && (
@@ -489,6 +517,7 @@ export default function Sales() {
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Order Source</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Customer</th>
                   <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Invoice Date</th>
+                  <th className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-secondary)]">Actions</th>
                 </>
               )}
             </tr>
@@ -513,11 +542,15 @@ export default function Sales() {
                     </td>
                     <td className="px-6 py-4 font-semibold text-[var(--color-ink)]">${parseFloat(r.grand_total || r.total_amount || 0).toFixed(2)}</td>
                     <td className="px-6 py-4">
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {r.status === 'DRAFT' && (
-                          <button onClick={() => submit(r.id)} className="rounded-lg bg-black/5 px-3 py-1.5 text-xs font-semibold hover:bg-black/10 transition">
-                            Submit
-                          </button>
+                          <>
+                            <button onClick={() => submit(r.id)} className="rounded-lg bg-black/5 px-3 py-1.5 text-xs font-semibold hover:bg-black/10 transition">
+                              Submit
+                            </button>
+                            <button onClick={() => openEdit(r)} className="rounded-lg bg-black/5 px-3 py-1.5 text-xs font-semibold hover:bg-black/10 transition">Edit</button>
+                            <button onClick={async () => { await api.sales.orders.remove(r.id); load(); }} className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 transition">Delete</button>
+                          </>
                         )}
                         {r.status === 'SUBMITTED' && (
                           <>
@@ -540,6 +573,13 @@ export default function Sales() {
                     <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.email || '—'}</td>
                     <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.phone || '—'}</td>
                     <td className="px-6 py-4 text-[var(--color-ink-secondary)] truncate max-w-xs">{r.address || '—'}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(r)} className="font-semibold text-[var(--color-apple-blue)] hover:underline">Edit</button>
+                        <button onClick={() => openDuplicate(r)} className="font-semibold text-[var(--color-ink)] hover:underline">Duplicate</button>
+                        <button onClick={async () => { await api.sales.customers.remove(r.id); load(); }} className="font-semibold text-red-600 hover:underline">Delete</button>
+                      </div>
+                    </td>
                   </>
                 )}
                 {tab === 'invoices' && (
@@ -548,6 +588,12 @@ export default function Sales() {
                     <td className="px-6 py-4 text-[var(--color-ink-secondary)]">Order ID {r.sales_order}</td>
                     <td className="px-6 py-4 text-[var(--color-ink)]">{r.customer_name || `Customer ID ${r.customer}`}</td>
                     <td className="px-6 py-4 text-[var(--color-ink-secondary)]">{r.invoice_date}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(r)} className="font-semibold text-[var(--color-apple-blue)] hover:underline">Edit</button>
+                        <button onClick={async () => { await api.sales.invoices.remove(r.id); load(); }} className="font-semibold text-red-600 hover:underline">Delete</button>
+                      </div>
+                    </td>
                   </>
                 )}
               </tr>

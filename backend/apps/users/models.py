@@ -22,6 +22,7 @@ class User(AbstractUser):
     department = CharField(max_length=30, choices=Department.choices, blank=True)
     role = CharField(max_length=20, choices=Role.choices, default=Role.STAFF)
     phone = CharField(max_length=20, blank=True)
+    company = models.ForeignKey('governance.CompanyConfig', on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
     is_active = BooleanField(default=True)
     last_login_at = DateTimeField(null=True, blank=True)
     created_at = DateTimeField(default=timezone.now)

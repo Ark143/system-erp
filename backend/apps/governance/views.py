@@ -7,6 +7,8 @@ class CompanyConfigViewSet(viewsets.ModelViewSet):
     queryset = models.CompanyConfig.objects.all()
     serializer_class = serializers.CompanyConfigSerializer
     permission_classes = _governance_perms
+    lookup_field = 'company_id'
+    lookup_url_kwarg = 'id'
 class BranchViewSet(viewsets.ModelViewSet):
     queryset = models.Branch.objects.all()
     serializer_class = serializers.BranchSerializer

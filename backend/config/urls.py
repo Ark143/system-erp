@@ -15,4 +15,5 @@ urlpatterns = [
     path('api/governance/', include('apps.governance.urls')),
     path('api/workflow/', include('apps.workflow.urls')),
     path('api/masterdata/', include('apps.masterdata.urls')),
+    path('api/settings/', include('apps.sku_settings.urls')),
 ]

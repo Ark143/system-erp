@@ -4,7 +4,11 @@ from .models import Account, JournalEntry, JournalEntryLine, FiscalYear, Payment
 class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ['id', 'code', 'name', 'account_type', 'parent', 'is_active', 'created_by', 'created_at', 'updated_at']
+        fields = [
+            'id', 'code', 'name', 'account_number', 'company', 'is_group',
+            'parent', 'root_type', 'report_type', 'account_type',
+            'account_currency', 'tax_rate', 'disabled', 'is_active'
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 class JournalEntrySerializer(serializers.ModelSerializer):

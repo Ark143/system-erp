@@ -3,10 +3,40 @@ from django.db import models
 class CompanyConfig(models.Model):
     company_id = models.CharField(max_length=64, primary_key=True)
     company_name = models.CharField(max_length=255)
+    abbreviation = models.CharField(max_length=5, unique=True)
+    auto_company_id = models.BooleanField(default=True)
+    parent_company = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subsidiaries')
+    is_group = models.BooleanField(default=False)
+    
+    # Identity & Localization
+    legal_name = models.CharField(max_length=255, blank=True, default='')
+    trade_name = models.CharField(max_length=255, blank=True, default='')
+    company_type = models.CharField(max_length=64, blank=True, default='')
+    registration_number = models.CharField(max_length=128, blank=True, default='')
     tax_registration_number = models.CharField(max_length=128, blank=True, default='')
+    date_of_incorporation = models.DateField(null=True, blank=True)
+    country = models.CharField(max_length=64, default='US')
+    state = models.CharField(max_length=64, blank=True, default='')
+    city = models.CharField(max_length=64, blank=True, default='')
+    address = models.TextField(blank=True, default='')
+    phone = models.CharField(max_length=20, blank=True, default='')
+    email = models.EmailField(max_length=255, blank=True, default='')
+    website = models.URLField(blank=True, default='')
+    timezone = models.CharField(max_length=32, blank=True, default='UTC')
+    
+    # Accounting defaults
     base_currency = models.ForeignKey('governance.Currency', on_delete=models.PROTECT, related_name='company_base_currencies', null=True, blank=True)
     default_valuation_method = models.CharField(max_length=20, choices=[('FIFO','FIFO'),('LIFO','LIFO'),('AVCO','AVCO'),('STANDARD','STANDARD')], default='AVCO')
     unrealized_profit_loss_account = models.CharField(max_length=64, blank=True, default='')
+    default_bank_account = models.CharField(max_length=64, blank=True, default='')
+    default_cash_account = models.CharField(max_length=64, blank=True, default='')
+    default_receivable_account = models.CharField(max_length=64, blank=True, default='')
+    default_payable_account = models.CharField(max_length=64, blank=True, default='')
+    
+    # Warehouses
+    default_stock_warehouse = models.ForeignKey('governance.Warehouse', on_delete=models.SET_NULL, null=True, blank=True, related_name='default_stock_companies')
+    default_manufacturing_warehouse = models.ForeignKey('governance.Warehouse', on_delete=models.SET_NULL, null=True, blank=True, related_name='default_manufacturing_companies')
+    
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

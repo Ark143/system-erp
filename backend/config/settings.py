@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'apps.workflow',
     'apps.masterdata',
     'apps.governance',
+    'apps.sku_settings',
 ]
 
 MIDDLEWARE = [

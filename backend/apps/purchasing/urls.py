@@ -6,7 +6,10 @@ from .views import (
   PurchaseRequisitionItemViewSet,
   PurchaseOrderViewSet,
   PurchaseOrderItemViewSet,
+  QuotationViewSet,
+  QuotationItemViewSet,
   GoodsReceiptViewSet,
+  SupplierInvoiceViewSet,
   GRNItemViewSet,
 )
 
@@ -16,7 +19,10 @@ router.register('purchase-requisitions', PurchaseRequisitionViewSet, basename='p
 router.register('purchase-requisition-items', PurchaseRequisitionItemViewSet, basename='purchaserequisitionitem')
 router.register('purchase-orders', PurchaseOrderViewSet, basename='purchaseorder')
 router.register('purchase-order-items', PurchaseOrderItemViewSet, basename='purchaseorderitem')
+router.register('quotations', QuotationViewSet, basename='quotation')
+router.register('quotation-items', QuotationItemViewSet, basename='quotationitem')
 router.register('grn', GoodsReceiptViewSet, basename='goodsreceipt')
+router.register('supplier-invoices', SupplierInvoiceViewSet, basename='supplierinvoice')
 router.register('grn-items', GRNItemViewSet, basename='grnitem')
 
 urlpatterns = [

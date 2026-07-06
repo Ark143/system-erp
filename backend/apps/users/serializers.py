@@ -6,10 +6,20 @@ from django.contrib.auth import authenticate
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    company = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'department', 'role', 'phone', 'is_active', 'created_at']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'department', 'role', 'phone', 'company', 'is_active', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+    def get_company(self, obj):
+        if not obj.company_id:
+            return None
+        return {
+            'company_id': obj.company.company_id,
+            'company_name': obj.company.company_name,
+        }
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)

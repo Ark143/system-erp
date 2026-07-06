@@ -10,10 +10,41 @@ class Account(models.Model):
         ('INCOME', 'Income'),
         ('EXPENSE', 'Expense'),
     ]
+    ROOT_TYPE_CHOICES = [
+        ('Asset', 'Asset'),
+        ('Liability', 'Liability'),
+        ('Equity', 'Equity'),
+        ('Income', 'Income'),
+        ('Expense', 'Expense'),
+    ]
+    REPORT_TYPE_CHOICES = [
+        ('Balance Sheet', 'Balance Sheet'),
+        ('Profit and Loss', 'Profit and Loss'),
+    ]
+    ACCOUNT_KIND_CHOICES = [
+        ('Bank', 'Bank'),
+        ('Cash', 'Cash'),
+        ('Receivable', 'Receivable'),
+        ('Payable', 'Payable'),
+        ('Cost of Goods Sold', 'Cost of Goods Sold'),
+        ('Tax', 'Tax'),
+        ('Equity', 'Equity'),
+        ('Income', 'Income'),
+        ('Expense', 'Expense'),
+        ('Other', 'Other'),
+    ]
     code = models.CharField(max_length=20, unique=True, db_index=True)
     name = models.CharField(max_length=100)
-    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES, db_index=True)
+    account_number = models.CharField(max_length=30, blank=True)
+    company = models.ForeignKey('governance.CompanyConfig', on_delete=models.SET_NULL, null=True, blank=True, related_name='chart_accounts')
+    is_group = models.BooleanField(default=False)
     parent = models.ForeignKey('accounting.Account', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
+    root_type = models.CharField(max_length=20, choices=ROOT_TYPE_CHOICES, blank=True)
+    report_type = models.CharField(max_length=30, choices=REPORT_TYPE_CHOICES, blank=True)
+    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES, db_index=True)
+    account_currency = models.CharField(max_length=3, blank=True)
+    tax_rate = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    disabled = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='accounts')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -23,7 +54,8 @@ class Account(models.Model):
         ordering = ['code']
 
     def __str__(self):
-        return f"{self.code} - {self.name}"
+        label = self.name or self.code
+        return f"{self.code} - {label}"
 
 
 class JournalEntry(models.Model):
@@ -176,6 +208,7 @@ class Currency(models.Model):
     name = models.CharField(max_length=100)
     symbol = models.CharField(max_length=10, blank=True)
     is_active = models.BooleanField(default=True)
+    is_base = models.BooleanField(default=False)
     class Meta:
         ordering = ['code']
     def __str__(self):
